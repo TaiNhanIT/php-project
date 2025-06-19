@@ -1,0 +1,99 @@
+.add-product-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .add-product-container h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .form-group select[multiple] {
+            height: 120px;
+        }
+        .btn-submit {
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .btn-submit:hover {
+            background: linear-gradient(90deg, #0056b3 0%, #004085 100%);
+        }
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .btn-back:hover {
+            background: #545b62;
+        }
+        .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.product-table th, .product-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+.product-table th {
+    background-color: #f4f4f4;
+}
+.btn-back, .btn-edit, .btn-delete {
+    display: inline-block;
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+.btn-back {
+    background-color: #6c757d;
+    color: #fff;
+}
+.btn-edit {
+    background-color: #007bff;
+    color: #fff;
+}
+.btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+}

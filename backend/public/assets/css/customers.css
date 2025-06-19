@@ -1,0 +1,211 @@
+/* Cấu trúc trang quản lý khách hàng */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #000 0%, #FFD700 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.customer-container {
+    flex: 1 0 auto;
+    max-width: 1200px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    padding: 32px;
+}
+
+h1 {
+    color: #FFD700;
+    text-align: center;
+    margin-bottom: 32px;
+    text-shadow: 1px 1px 8px #000;
+}
+
+.add-btn {
+    background: #FFD700;
+    color: #000;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.add-btn:hover {
+    background: #ffea70;
+}
+
+.customer-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 18px;
+}
+
+.customer-table th,
+.customer-table td {
+    padding: 16px 12px;
+    border: 1px solid #FFD700;
+    text-align: center;
+}
+
+.customer-table th {
+    background: #FFD700;
+    color: #000;
+    font-size: 20px;
+}
+
+.action-btn {
+    background: #FFD700;
+    color: #000;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: bold;
+    margin: 0 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-btn:hover {
+    background: #ffea70;
+}
+
+.address-btn {
+    background: #222;
+    color: #FFD700;
+    border: 1px solid #FFD700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin: 0 2px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.address-btn:hover {
+    background: #FFD700;
+    color: #000;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #222;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.customer-container {
+    width: 1100px;
+    margin: 40px auto;
+    background: #222;
+    border-radius: 16px;
+    box-shadow: 0 0 20px #0008;
+    padding: 32px 24px;
+}
+
+.customer-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #333;
+}
+
+.customer-table th,
+.customer-table td {
+    border: 1px solid #555;
+    padding: 8px 10px;
+    text-align: center;
+}
+
+.customer-table th {
+    background: #ffd600;
+    color: #222;
+}
+
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-btn,
+.address-btn,
+.delete-btn {
+    min-width: 80px;
+    padding: 4px 0;
+    border-radius: 6px;
+    border: none;
+    background: #ffd600;
+    color: #222;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.action-btn:hover,
+.address-btn:hover,
+.delete-btn:hover {
+    background: #ffb300;
+}
+
+/*Phần chuyểnchuyển trang*/
+.pagination {
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 40px;
+    width: 100vw;
+    box-sizing: border-box;
+    background: transparent;
+    /* Loại bỏ margin-top/margin-bottom nếu có */
+    margin: 0;
+    position: relative;
+    z-index: 2;
+}
+
+/* Style cho các nút phân trang */
+.pagination a,
+.pagination span.current {
+    display: inline-block;
+    min-width: 36px;
+    padding: 8px 16px;
+    margin: 0 4px;
+    background: #ffd600;
+    color: #222;
+    font-weight: bold;
+    border-radius: 6px;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.pagination a:hover {
+    background: #ffb300;
+    color: #fff;
+}
+
+.pagination span.current {
+    background: #ffd600;
+    color: #fff;
+    pointer-events: none;
+}

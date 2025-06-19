@@ -1,0 +1,154 @@
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.edit-container {
+    background: rgba(20, 40, 60, 0.98);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 #000a;
+    padding: 36px 32px 28px 32px;
+    width: 420px;
+}
+
+h2 {
+    color: #00ffe7;
+    text-align: center;
+    margin-bottom: 28px;
+    letter-spacing: 1px;
+}
+
+label {
+    color: #b2d8ff;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 16px;
+    border: none;
+    border-radius: 6px;
+    background: #1a2a3a;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    box-shadow: 0 1px 2px #0004 inset;
+}
+
+input[disabled] {
+    background: #223344;
+    color: #7ecfff;
+}
+
+.address-group {
+    margin-bottom: 18px;
+}
+
+.address-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.address-row input {
+    flex: 1;
+    min-width: 0;
+}
+
+.address-row button {
+    background: #ff4e50;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.address-row button:hover {
+    background: #ff7e5f;
+}
+
+.add-address-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.add-address-row input {
+    flex: 1;
+}
+
+.add-address-row button {
+    background: #00ffe7;
+    color: #222;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.add-address-row button:hover {
+    background: #00bfae;
+    color: #fff;
+}
+
+.btn-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 18px;
+}
+
+.btn-save {
+    background: linear-gradient(90deg, #00ffe7 0%, #005bea 100%);
+    color: #222;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 24px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-save:hover {
+    background: linear-gradient(90deg, #005bea 0%, #00ffe7 100%);
+    color: #fff;
+}
+
+.btn-cancel {
+    background: #223344;
+    color: #b2d8ff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+    background: #1a2a3a;
+    color: #00ffe7;
+}
+
+.error {
+    color: #ffbaba;
+    background: #2c2c2c;
+    border-left: 4px solid #ff4e50;
+    padding: 8px 12px;
+    margin-bottom: 18px;
+    border-radius: 6px;
+}

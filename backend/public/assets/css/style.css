@@ -1,0 +1,442 @@
+/* Cấu hình toàn trang */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Toàn bộ trang với nền đen */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #111;
+    /* Đặt nền đen cho toàn bộ trang */
+    color: white;
+}
+
+/* Cấu trúc header */
+header {
+    background-color: #111;
+    /* Màu nền đen cho header */
+    color: white;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+header .logo {
+    font-size: 30px;
+    font-weight: bold;
+    color: #FFBF00;
+    /* Màu vàng sang trọng cho logo */
+}
+
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+header nav ul li {
+    display: inline-block;
+}
+
+header nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+header nav ul li a:hover {
+    color: #FFBF00;
+    /* Màu vàng cho liên kết khi hover */
+}
+
+/* Cấu trúc banner */
+.banner {
+    background-color: #111;
+    /* Đặt màu nền đen */
+    color: white;
+    text-align: center;
+    padding: 80px 50px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.banner h1 {
+    font-size: 60px;
+    margin-bottom: 20px;
+    color: #FFBF00;
+    /* Màu vàng nổi bật cho tiêu đề */
+}
+
+.banner p {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.banner .btn-buy {
+    background-color: #FFBF00;
+    padding: 15px 40px;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.banner .btn-buy:hover {
+    background-color: #FFA500;
+    /* Hiệu ứng màu khi hover */
+}
+
+/* Cấu trúc sản phẩm */
+.product-slider {
+    background-color: #333;
+    text-align: center;
+    padding: 50px 0;
+}
+
+.product-slider h2 {
+    font-size: 32px;
+    color: #FFBF00;
+    /* Màu vàng cho tiêu đề sản phẩm */
+    margin-bottom: 30px;
+}
+
+.product-slider .slider {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.product-slider .product {
+    text-align: center;
+    max-width: 250px;
+    margin-bottom: 30px;
+    background-color: #444;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.product-slider .product img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+.product-slider .product p {
+    font-size: 18px;
+    color: #FFBF00;
+    /* Màu vàng cho tên sản phẩm */
+}
+
+.product-slider .btn-view {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #0066cc;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.product-slider .btn-view:hover {
+    background-color: #004999;
+}
+
+/* Cấu trúc footer */
+footer {
+    background-color: #111;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.2);
+}
+
+footer ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+footer ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+footer ul li a:hover {
+    color: #FFBF00;
+    /* Màu vàng khi hover trong footer */
+}
+
+/* Cấu hình toàn trang */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #111;
+    /* Nền màu đen */
+    color: white;
+}
+
+/* Header */
+header {
+    background-color: #111;
+    color: white;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+header .logo {
+    font-size: 30px;
+    font-weight: bold;
+    color: #FFBF00;
+    /* Màu vàng cho logo */
+}
+
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+header nav ul li {
+    display: inline-block;
+}
+
+header nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+header nav ul li a:hover {
+    color: #FFBF00;
+}
+
+/* Category Banner */
+.category-banner {
+    background-color: #222;
+    color: #FFBF00;
+    /* Màu vàng cho tiêu đề */
+    text-align: center;
+    padding: 50px 0;
+}
+
+.category-banner h1 {
+    font-size: 40px;
+    margin-bottom: 15px;
+}
+
+.category-banner p {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+/* Category Products */
+.category-products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    padding: 50px;
+}
+
+.product-card {
+    background-color: #333;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.product-card h3 {
+    font-size: 20px;
+    color: #FFBF00;
+    /* Màu vàng cho tên sản phẩm */
+    margin-bottom: 15px;
+}
+
+.product-card .btn-view {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0066cc;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.product-card .btn-view:hover {
+    background-color: #004999;
+}
+
+/* Footer */
+footer {
+    background-color: #111;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+footer ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+footer ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+footer ul li a:hover {
+    color: #FFBF00;
+}
+
+/* Cấu trúc header */
+header {
+    background-color: #111;
+    color: white;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+header .logo {
+    font-size: 30px;
+    font-weight: bold;
+    color: #FFBF00;
+    /* Màu vàng cho logo */
+    text-decoration: none;
+}
+
+/* Cấu trúc footer */
+footer {
+    background-color: #111;
+    color: white;
+    padding: 40px 0;
+    text-align: center;
+}
+
+footer ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+footer ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+footer ul li a:hover {
+    color: #FFBF00;
+}
+
+footer p {
+    font-size: 14px;
+    margin-top: 20px;
+    color: #888;
+}
+
+.auth-btn-nav {
+    padding: 8px 20px;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #e385ec 0%, #004aad 100%);
+    color: #fff !important;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+    margin-left: 10px;
+    display: inline-block;
+}
+
+.auth-btn-nav:hover {
+    background: linear-gradient(90deg, #004aad 0%, #e385ec 100%);
+    transform: translateY(-2px) scale(1.03);
+    color: #fff !important;
+}
+
+/* SamSung/css/style.css */
+.owl-carousel .item {
+    text-align: center;
+    padding: 10px;
+}
+.owl-carousel .item img {
+    max-width: 100%;
+    height: auto;
+}
+.no-image-placeholder {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+}
+.no-image-placeholder span {
+    font-size: 24px;
+}
+.no-image-placeholder p {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: #666;
+}
+.product-title, .product-price {
+    margin: 5px 0;
+}
+.btn-view {
+    display: inline-block;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
