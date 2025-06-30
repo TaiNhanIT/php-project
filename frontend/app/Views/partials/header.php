@@ -1,7 +1,12 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+// Tính tổng số lượng sản phẩm trong giỏ hàng
+$cart_count = 0;
+if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
+    foreach ($_SESSION['cart'] as $item) {
+        $cart_count += $item['quantity'];
+    }
+}
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +18,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
-    <!-- Bootstrap -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -24,10 +29,20 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
     <style>
         body {
-            font-family: 'quicksand';
+            font-family: 'Quicksand', sans-serif;
         }
-        x-cloak {
+        [x-cloak] {
             display: none !important;
+        }
+        .cart-count {
+            position: absolute;
+            top: 15px;
+            right: -10px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -44,7 +59,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
         <ul class="w-full flex justify-center gap-10">
             <li><a href="#">Ưu Đãi</a></li>
             <li><a href="#">Di Động</a></li>
-            <li><a href="#">TV &amp; AV</a></li>
+            <li><a href="#">TV & AV</a></li>
             <li><a href="#">Gia Dụng</a></li>
             <li><a href="#">IT</a></li>
             <li><a href="#">Phụ Kiện</a></li>
@@ -52,22 +67,36 @@ if (session_status() === PHP_SESSION_NONE) session_start();
             <li><a href="#">AI</a></li>
         </ul>
         <div class="w-[20%] flex gap-5 justify-end">
-            <a href="/auth/register">
+            <a href="/cart/index" class="relative">
                 <svg class="icon w-[20px]" focusable="false" aria-hidden="true" width="96" height="96" viewBox="0 0 96 96">
                     <path d="M72.817 71.324c5.522 0 10 4.478 10 10 0 5.524-4.477 10-10 10s-10-4.476-10-10c0-5.522 4.477-10 10-10zm-34.946 0c5.523 0 10 4.478 10 10 0 5.524-4.477 10-10 10-5.522 0-10-4.476-10-10 0-5.521 4.479-10 10-10zm34.946 5a5.001 5.001 0 000 10 5 5 0 100-10zm-34.946 0a5 5 0 10.001 9.999 5 5 0 00-.001-9.999zM13.674 5c1.62 0 3.11 1.117 3.6 2.648l.054.186 3.208 12.292h70.035c2.126 0 3.61 1.88 3.194 3.914l-.041.18-9.398 36.292c-.405 1.566-1.849 2.747-3.459 2.835l-.194.006H29.57c-1.619 0-3.11-1.118-3.6-2.65l-.054-.185L12.725 10l-11.614.007-.002-5L13.674 5zm74.65 20.126H21.842l8.674 33.226H79.72l8.604-33.226z"></path>
                 </svg>
+                <?php if ($cart_count > 0): ?>
+                    <span class="cart-count"><?php echo htmlspecialchars($cart_count); ?></span>
+                <?php endif; ?>
             </a>
             <div class="relative" x-data="{ open: false }" x-on:click="open = ! open">
+                <div class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
                 <a href="#">
-                    <svg class="icon w-[20px]" focusable="false" aria-hidden="true" width="96" height="96" viewBox="0 0 96 96">
-                        <path d="M48,51.5c16.521,0,30.5,13.82,30.5,29.555h0V89A3.5,3.5,0,0,1,75,92.5H21A3.5,3.5,0,0,1,17.5,89h0V81.055C17.5,65.32,31.479,51.5,48,51.5Zm0,5c-13.772,0-25.5,11.595-25.5,24.555h0V87.5h51V81.055c0-12.831-11.494-24.323-25.087-24.552h0Zm0-53A20.5,20.5,0,1,1,27.5,24,20.5,20.5,0,0,1,48,3.5Zm0,5A15.5,15.5,0,1,0,63.5,24,15.5,15.5,0,0,0,48,8.5Z" transform="translate(-0.5 0.5)"></path>
-                    </svg>
-                </a>
+                        <svg class="icon w-[20px]" focusable="false" aria-hidden="true" width="96" height="96" viewBox="0 0 96 96">
+                            <path d="M48,51.5c16.521,0,30.5,13.82,30.5,29.555h0V89A3.5,3.5,0,0,1,75,92.5H21A3.5,3.5,0,0,1,17.5,89h0V81.055C17.5,65.32,31.479,51.5,48,51.5Zm0,5c-13.772,0-25.5,11.595-25.5,24.555h0V87.5h51V81.055c0-12.831-11.494-24.323-25.087-24.552h0Zm0-53A20.5,20.5,0,1,1,27.5,24,20.5,20.5,0,0,1,48,3.5Zm0,5A15.5,15.5,0,1,0,63.5,24,15.5,15.5,0,0,0,48,8.5Z" transform="translate(-0.5 0.5)"></path>
+                        </svg>
+                    </a>
+                    <?php if (isset($_SESSION['customer_id'])): ?>
+                        <span class="text-sm"><?php echo htmlspecialchars($_SESSION['customer_name'] ?? ''); ?></span>
+                    <?php endif; ?>
+                </div>
                 <div id="header-account-menu" class="bg-white border absolute z-10 top-[75px] right-0 w-[200px]" x-show="open" x-cloak>
                     <div class="links text-center">
                         <ul>
-                            <li class="py-2.5"><a href="/customer/dashboard/" title="Thông Tin">Thông Tin</a></li>
-                            <li class="py-2.5"><a href="/auth/login/" title="Đăng Nhập">Đăng Nhập</a></li>
+                            <?php if (isset($_SESSION['customer_id'])): ?>
+                                <li class="py-2.5"><a href="/customer/dashboard/" title="Thông Tin">Thông Tin</a></li>
+                                <li class="py-2.5">
+                                    <a href="#" id="logout-link" title="Đăng Xuất">Đăng Xuất</a>
+                                </li>
+                            <?php else: ?>
+                                <li class="py-2.5"><a href="/auth/login/" title="Đăng Nhập">Đăng Nhập</a></li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </div>
@@ -75,4 +104,34 @@ if (session_status() === PHP_SESSION_NONE) session_start();
         </div>
     </div>
 </header>
-<main>
+<?php
+$message = '';
+$class = "container m-auto bg-green-500 py-2 px-4 rounded-md text-white flex justify-between";
+if (!empty($_SESSION['success_message'])) {
+    $message = $_SESSION['success_message'];
+    unset($_SESSION['success_message']);
+}
+if (!empty($_SESSION['error_message'])) {
+    $message = $_SESSION['error_message'];
+    $class = "container m-auto bg-red-500 py-2 px-4 rounded-md text-white flex justify-between";
+    unset($_SESSION['error_message']);
+}
+?>
+<?php if (!empty($message)): ?>
+    <div class="<?= $class ?>">
+        <p><?= htmlspecialchars($message) ?></p>
+        <span class="cursor-pointer font-bold" onclick="this.parentNode.remove()"><sup>X</sup></span>
+    </div>
+<?php endif; ?>
+<script>
+    $(document).ready(function() {
+        $('#logout-link').on('click', function(e) {
+            e.preventDefault();
+            if (confirm('Bạn có chắc muốn đăng xuất?')) {
+                window.location.href = '/auth/logout';
+            }
+        });
+    });
+</script>
+</body>
+</html>

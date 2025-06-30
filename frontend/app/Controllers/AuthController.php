@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../Core/Controller.php';
 require_once __DIR__ . '/../Models/Customer.php';
+require_once __DIR__ . '/../../Services/MailService.php'; // Đảm bảo đường dẫn đúng
 
 class AuthController extends Controller
 {
@@ -17,22 +18,23 @@ class AuthController extends Controller
         $registerSuccess = '';
         $email = '';
         $password = '';
-        
+
         if (isset($_SESSION['register_success'])) {
             $registerSuccess = $_SESSION['register_success'];
             unset($_SESSION['register_success']);
         }
-        
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = trim($_POST['email'] ?? '');
             $password = trim($_POST['password'] ?? '');
-            
+
             $customerModel = new Customer();
             $customer = $customerModel->getCustomerByEmail($email);
 
             if ($customer && password_verify($password, $customer['password'])) {
                 $_SESSION['customer_id'] = $customer['id'];
                 $_SESSION['customer_email'] = $customer['email'];
+                $_SESSION['customer_name'] = trim($customer['first_name'] . ' ' . $customer['last_name']);
                 header('Location: /');
                 exit;
             } else {
@@ -105,7 +107,7 @@ class AuthController extends Controller
                         if ($customer_id) {
                             $_SESSION['register_success'] = "Đăng ký thành công! Vui lòng đăng nhập.";
                             $_SESSION['login_email'] = $form_data['email'];
-                            $_SESSION['login_password'] = $form_data['password']; // Lưu tạm mật khẩu để điền vào form đăng nhập
+                            $_SESSION['login_password'] = $form_data['password'];
                             header('Location: /auth/login');
                             exit;
                         } else {
@@ -119,9 +121,88 @@ class AuthController extends Controller
             }
         }
 
-        $this->view('customer/register', [
+        $this->view('customer/login', [
             'register_error' => $register_error,
             'form_data' => $form_data
         ]);
+    }
+
+    public function forgotPassword()
+    {
+        $error = '';
+        $success = '';
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $email = trim($_POST['email'] ?? '');
+            $customerModel = new Customer();
+            $customer = $customerModel->getCustomerByEmail($email);
+
+            if ($customer) {
+                $token = bin2hex(random_bytes(32));
+                if ($customerModel->saveResetToken($email, $token)) {
+                    $mailService = new MailService();
+                    $result = $mailService->sendResetPasswordEmail($email, $token);
+                    $success = $result['message'];
+                } else {
+                    $error = 'Lỗi khi lưu token.';
+                }
+            } else {
+                $error = 'Email không tồn tại.';
+            }
+        }
+
+        $this->view('customer/forgotPassword', ['error' => $error, 'success' => $success]);
+    }
+
+    public function resetPassword($token = '')
+    {
+        $error = '';
+        $success = '';
+
+        if (empty($token)) {
+            $error = 'Token không hợp lệ.';
+        } else {
+            $customerModel = new Customer();
+            $customer = $customerModel->getCustomerByToken($token);
+
+            if (!$customer) {
+                $error = 'Token không hợp lệ hoặc không tồn tại.';
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $password = trim($_POST['password'] ?? '');
+                $confirmPassword = trim($_POST['confirm_password'] ?? '');
+
+                if (empty($password) || empty($confirmPassword)) {
+                    $error = 'Vui lòng nhập mật khẩu.';
+                } elseif ($password !== $confirmPassword) {
+                    $error = 'Mật khẩu không khớp.';
+                } elseif (strlen($password) < 6) {
+                    $error = 'Mật khẩu phải ít nhất 6 ký tự.';
+                } else {
+                    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                    if ($customerModel->updatePassword($customer['email'], $hashedPassword)) {
+                        $customerModel->clearResetToken($customer['email']);
+                        $success = 'Mật khẩu đã được đặt lại. Vui lòng đăng nhập.';
+                        ob_clean();
+                        header('Location: /auth/login');
+                        exit;
+                    } else {
+                        $error = 'Lỗi khi cập nhật mật khẩu.';
+                    }
+                }
+            }
+        }
+
+        $this->view('customer/resetPassword', ['error' => $error, 'success' => $success, 'token' => $token]);
+    }
+
+    public function logout()
+    {
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        // Xóa thông tin session của khách hàng
+        unset($_SESSION['customer_id']);
+        unset($_SESSION['customer_email']);
+        unset($_SESSION['customer_name']);
+        header('Location: /auth/login');
+        exit;
     }
 }

@@ -1,12 +1,15 @@
 <?php
-class Controller {
-    public function view($view, $data = []) {
-        // Extract $data array keys as variables for the view file
+class Controller
+{
+    public function view($view, $data = [])
+    {
         extract($data);
-
-        // Require the view file
-        require_once "../app/Views/partials/header.php";
-        require_once "../app/Views/{$view}.php";
-        require_once "../app/Views/partials/footer.php";
+        $basePath = dirname(__DIR__) . '/Views/';
+        if (!file_exists($basePath . 'partials/header.php') || !file_exists($basePath . str_replace('/', DIRECTORY_SEPARATOR, $view) . '.php') || !file_exists($basePath . 'partials/footer.php')) {
+            die("Debug: View file missing for $view");
+        }
+        require_once $basePath . 'partials/header.php';
+        require_once $basePath . str_replace('/', DIRECTORY_SEPARATOR, $view) . '.php';
+        require_once $basePath . 'partials/footer.php';
     }
 }
