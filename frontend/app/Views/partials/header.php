@@ -76,14 +76,14 @@ if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
                 <?php endif; ?>
             </a>
             <div class="relative" x-data="{ open: false }" x-on:click="open = ! open">
-                <div class="flex items-center gap-2 cursor-pointer hover:text-blue-600">
-                <a href="#">
+                <div class="flex items-center">
+                    <a href="#">
                         <svg class="icon w-[20px]" focusable="false" aria-hidden="true" width="96" height="96" viewBox="0 0 96 96">
                             <path d="M48,51.5c16.521,0,30.5,13.82,30.5,29.555h0V89A3.5,3.5,0,0,1,75,92.5H21A3.5,3.5,0,0,1,17.5,89h0V81.055C17.5,65.32,31.479,51.5,48,51.5Zm0,5c-13.772,0-25.5,11.595-25.5,24.555h0V87.5h51V81.055c0-12.831-11.494-24.323-25.087-24.552h0Zm0-53A20.5,20.5,0,1,1,27.5,24,20.5,20.5,0,0,1,48,3.5Zm0,5A15.5,15.5,0,1,0,63.5,24,15.5,15.5,0,0,0,48,8.5Z" transform="translate(-0.5 0.5)"></path>
                         </svg>
                     </a>
                     <?php if (isset($_SESSION['customer_id'])): ?>
-                        <span class="text-sm"><?php echo htmlspecialchars($_SESSION['customer_name'] ?? ''); ?></span>
+                        <span class="mr-2 text-sm"><?php echo htmlspecialchars($_SESSION['customer_name'] ?? ''); ?></span>
                     <?php endif; ?>
                 </div>
                 <div id="header-account-menu" class="bg-white border absolute z-10 top-[75px] right-0 w-[200px]" x-show="open" x-cloak>

@@ -112,6 +112,7 @@
             </div>
         </div>
     </div>
+
     <!-- Phần 3: Giỏ hàng và nút mua hàng -->
     <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-bold mb-4">Thông tin giỏ hàng</h2>
@@ -136,3 +137,4 @@
             <p>Giỏ hàng trống.</p>
         <?php endif; ?>
     </div>
+</div>
