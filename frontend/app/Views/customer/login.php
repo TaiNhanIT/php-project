@@ -15,16 +15,15 @@
 <div class="container mx-auto">
     <div class="max-w-md mx-auto bg-white">
         <div class="p-8">
-            <!-- Toggle between Login and Signup -->
+            <!-- Toggle between Login, Signup, and Forgot Password -->
             <div class="flex justify-center mb-8">
                 <button id="loginTab" class="px-6 py-2 font-medium text-white bg-blue-500 rounded-l-lg focus:outline-none">
-                    Login
-                </button>
-                <button id="signupTab" class="px-6 py-2 font-medium text-blue-500 bg-white border border-blue-500 rounded-r-lg focus:outline-none">
-                    Sign Up
-                </button>
+        Login
+    </button>
+    <button id="signupTab" class="px-6 py-2 font-medium text-blue-500 bg-white border border-blue-500 focus:outline-none">
+        Sign Up
+    </button>
             </div>
-
             <!-- Login Form -->
             <form id="loginForm" class="space-y-6" method="post" action="/auth/login">
                 <h2 class="text-2xl font-bold text-center text-gray-800">Welcome Back</h2>
@@ -42,7 +41,7 @@
                         <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
                     </div>
                     <div class="text-sm">
-                        <a href="#" class="font-medium text-blue-500 hover:text-blue-700">Forgot password?</a>
+                        <a href="/auth/forgotPassword" class="font-medium text-blue-500 hover:text-blue-700">Forgot password?</a>
                     </div>
                 </div>
                 <div>
@@ -94,7 +93,11 @@
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
 
-        // Switch to Signup form
+        if (!loginTab || !signupTab || !loginForm || !signupForm) {
+            console.error('One or more DOM elements not found');
+            return;
+        }
+
         signupTab.addEventListener('click', function(e) {
             e.preventDefault();
             loginForm.classList.add('hidden');
@@ -103,9 +106,10 @@
             loginTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             signupTab.classList.remove('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             signupTab.classList.add('bg-blue-500', 'text-white');
+            forgotTab.classList.remove('bg-blue-500', 'text-white');
+            forgotTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
         });
 
-        // Switch to Login form
         loginTab.addEventListener('click', function(e) {
             e.preventDefault();
             signupForm.classList.add('hidden');
@@ -114,6 +118,14 @@
             signupTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             loginTab.classList.remove('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             loginTab.classList.add('bg-blue-500', 'text-white');
+            forgotTab.classList.remove('bg-blue-500', 'text-white');
+            forgotTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
+        });
+
+        forgotTab.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Redirecting to /auth/forgotPassword');
+            window.location.href = '/auth/forgotPassword';
         });
     });
 </script>

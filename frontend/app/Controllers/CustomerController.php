@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../Core/Controller.php';
 require_once __DIR__ . '/../Models/Products.php';
 require_once __DIR__ . '/../Models/Category.php';
-
+require_once __DIR__ . '/../Models/Customer.php';
 class CustomerController extends Controller {
 	public function index() {
 	    $customerModel = new Customer();
@@ -15,13 +15,13 @@ class CustomerController extends Controller {
 	    $totalCustomers = $customerModel->countCustomers();
 	    $totalPages = ceil($totalCustomers / $perPage);
 
-	    require __DIR__ . '/../views/customers/listCustomers.php';
+	    require __DIR__ . '/../views/customer/listCustomers.php';
 	}
 
     public function detail($id) {
         $customerModel = new Customer(); // Tạo đối tượng model Customer
         $customer = $customerModel->getCustomerById($id); // Lấy thông tin khách hàng theo id
-        require_once __DIR__ . '/../views/customers/detail.php';
+        require_once __DIR__ . '/../views/customer/detail.php';
     }
 	public function edit($id) {
 	    $customerModel = new Customer();
@@ -80,18 +80,28 @@ class CustomerController extends Controller {
 	                    );
 	                }
 	            }
-	            header('Location: ?controller=customer&action=index');
+	            header('Location: /Customer/index');
 	            exit;
 	        }
 	    }
 
-	    require __DIR__ . '/../views/customers/edit.php';
+	    require __DIR__ . '/../views/customer/edit.php';
 	}
 	public function delete($id) {
 	    $customerModel = new Customer();
 	    $result = $customerModel->deleteCustomer($id);
-	    // Sau khi xóa, chuyển hướng về danh sách khách hàng
-	    header('Location: ?controller=customer&action=index');
+	    header('Location: /Customer/index');
 	    exit;
 	}
+    public function dashboard() {
+        if (!isset($_SESSION['customer_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $customerModel = new Customer();
+        $customer = $customerModel->getCustomerById($_SESSION['customer_id']);
+
+        require __DIR__ . '/../views/customer/dashboard.php';
+    }
 }
