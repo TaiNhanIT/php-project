@@ -8,7 +8,7 @@ class Cart
     public function __construct()
     {
         $database = new Database();
-        $this->dbh = $database->getDbh();
+        $this->dbh = $database->getDbh(); // Lấy đối tượng PDO từ Database
         if ($this->dbh === null) {
             throw new Exception("Không thể kết nối đến cơ sở dữ liệu.");
         }
