@@ -31,7 +31,7 @@ class MailService
             $mail->addAddress($email);
             $mail->Subject = 'Reset Your Password';
             $mail->isHTML(true);
-            $mail->Body = "<p>Click <a href='http://localhost:3000/auth/resetPassword&token=" . urlencode($token) . "'>here</a> to reset your password.</p>";
+            $mail->Body = "<p>Click <a href='http://localhost/php-project/public/?url=auth/resetPassword&token=" . urlencode($token) . "'>here</a> to reset your password.</p>";
 
             $mail->send();
             return ['success' => true, 'message' => 'Liên kết reset đã được gửi.'];

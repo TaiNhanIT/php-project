@@ -136,18 +136,12 @@ class CheckoutController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
             $customer_id = $_SESSION['customer_id'] ?? null;
-            if (!$customer_id) {
-                $_SESSION['error_message'] = 'Vui lòng đăng nhập để đặt hàng!';
-                header('Location: /checkout');
-                exit;
-            }
-
             $address = json_decode($_POST['selected_address'] ?? '', true);
             $shipping_method = $_POST['shipping_method'] ?? 'standard';
             $payment_method = $_POST['payment_method'] ?? 'cod';
+
             $cart_items = $this->cartModel->getCartItems($customer_id);
             $total = 0;
-
             foreach ($cart_items as $item) {
                 $total += $item['price'] * $item['quantity'];
             }
@@ -158,21 +152,18 @@ class CheckoutController extends Controller
                 exit;
             }
 
-            try {
-                $order_id = $this->saveOrder($customer_id, $address, $shipping_method, $payment_method, $total);
-                foreach ($cart_items as $item) {
-                    $this->saveOrderDetail($order_id, $item['product_id'], $item['quantity'], $item['price']);
-                    $this->updateStock($item['product_id'], $item['quantity']);
-                    $this->cartModel->removeFromCart($customer_id, $item['product_id']);
-                }
-                $_SESSION['success_message'] = 'Đơn hàng đã được đặt thành công!';
-                header('Location: /');
-                exit;
-            } catch (Exception $e) {
-                $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();
-                header('Location: /checkout');
-                exit;
-            }
+            // Lưu vào session để chuyển sang trang order xử lý
+            $_SESSION['order_data'] = [
+                'customer_id' => $customer_id,
+                'address' => $address,
+                'shipping_method' => $shipping_method,
+                'payment_method' => $payment_method,
+                'total' => $total,
+                'cart_items' => $cart_items
+            ];
+
+            header('Location: /order/confirm');
+            exit;
         }
     }
 

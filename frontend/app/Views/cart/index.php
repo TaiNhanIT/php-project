@@ -1,20 +1,5 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) session_start();
-?>
-
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Giỏ Hàng</title>
-    <link rel="stylesheet" href="/public/assets/css/style.css">
-</head>
-<body>
 <div class="container mx-auto p-6">
     <h1 class="text-3xl font-bold mb-6">Giỏ Hàng</h1>
-    <?php if (isset($error) && !empty($error)): ?>
-        <div class="bg-red-500 text-white p-4 mb-4 rounded"><?php echo htmlspecialchars($error); ?></div>
-    <?php endif; ?>
     <?php if (empty($_SESSION['cart']) || !is_array($_SESSION['cart'])): ?>
         <div class="bg-red-500 text-white p-4 mb-4 rounded">Giỏ hàng của bạn đang trống.</div>
     <?php else: ?>

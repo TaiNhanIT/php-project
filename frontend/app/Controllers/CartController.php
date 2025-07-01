@@ -1,10 +1,12 @@
 <?php
 require_once __DIR__ . '/../Core/Controller.php';
 require_once __DIR__ . '/../Models/Products.php';
+require_once __DIR__ . '/../Models/Cart.php';
 
 class CartController extends Controller
 {
     private $productModel;
+    private $cartModel;
 
     public function __construct()
     {
@@ -12,6 +14,7 @@ class CartController extends Controller
             session_start();
         }
         $this->productModel = new Products();
+        $this->cartModel = new Cart();
     }
 
     public function index()
@@ -36,6 +39,7 @@ class CartController extends Controller
                     foreach ($cartItems as &$item) {
                         if ($item['id'] == $productId) {
                             $item['quantity'] = $quantity > 0 ? $quantity : 1;
+                            $this->cartModel->updateCartItem($customerId, $productId, $quantity > 0 ? $quantity : 1);
                             break;
                         }
                     }
@@ -46,6 +50,7 @@ class CartController extends Controller
                         return $item['id'] != $productId;
                     });
                     $_SESSION['cart'] = array_values($_SESSION['cart']);
+                    $this->cartModel->removeFromCart($customerId, $productId);
                 }
                 header('Location: /cart/index');
                 exit;
@@ -113,6 +118,7 @@ class CartController extends Controller
         foreach ($_SESSION['cart'] as &$item) {
             if ($item['id'] == $productId) {
                 $item['quantity'] += $quantity;
+                $this->cartModel->updateCartItem($customerId, $productId, $item['quantity']);
                 $found = true;
                 break;
             }
@@ -126,6 +132,7 @@ class CartController extends Controller
                 'quantity' => $quantity,
                 'image' => $product['image'] ?? 'default.jpg'
             ];
+            $this->cartModel->addToCart($productId, $customerId);
         }
 
         $_SESSION['success_message'] = 'Thêm vào giỏ hàng thành công!';

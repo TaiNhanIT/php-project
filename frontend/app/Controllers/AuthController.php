@@ -159,6 +159,8 @@ class AuthController extends Controller
         $error = '';
         $success = '';
 
+        echo "Debug: Entering resetPassword with token = $token<br>";
+
         if (empty($token)) {
             $error = 'Token không hợp lệ.';
         } else {
@@ -182,8 +184,7 @@ class AuthController extends Controller
                     if ($customerModel->updatePassword($customer['email'], $hashedPassword)) {
                         $customerModel->clearResetToken($customer['email']);
                         $success = 'Mật khẩu đã được đặt lại. Vui lòng đăng nhập.';
-                        ob_clean();
-                        header('Location: /auth/login');
+                        header('Location: /?url=auth/login');
                         exit;
                     } else {
                         $error = 'Lỗi khi cập nhật mật khẩu.';
