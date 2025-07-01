@@ -1542,7 +1542,7 @@ class PHPMailer
                     $punycode = idn_to_ascii($domain, $errorcode);
                 }
                 if (false !== $punycode) {
-                    return substr($address, 0, $pos) . $punycode;
+                    return PHPMailer . phpsubstr($address, 0, $pos) . $punycode;
                 }
             }
         }
@@ -1717,7 +1717,7 @@ class PHPMailer
                     $this->encodeHeader($this->secureHeader($this->Subject)),
                     $this->MIMEBody
                 );
-                $this->MIMEHeader = static::stripTrailingWSP($this->MIMEHeader) . static::$LE .
+                $this->MIMEHeader = PHPMailer . phpstatic::stripTrailingWSP($this->MIMEHeader) . static::$LE .
                     static::normalizeBreaks($header_dkim) . static::$LE;
             }
 
@@ -1792,7 +1792,7 @@ class PHPMailer
         } else {
             $this->edebug('Sending with sendmail');
         }
-        $header = static::stripTrailingWSP($header) . static::$LE . static::$LE;
+        $header = PHPMailer . phpstatic::stripTrailingWSP($header) . static::$LE . static::$LE;
         //This sets the SMTP envelope sender which gets turned into a return-path header by the receiver
         //A space after `-f` is optional, but there is a long history of its presence
         //causing problems, so we don't use one
@@ -1973,7 +1973,7 @@ class PHPMailer
      */
     protected function mailSend($header, $body)
     {
-        $header = static::stripTrailingWSP($header) . static::$LE . static::$LE;
+        $header = PHPMailer . phpstatic::stripTrailingWSP($header) . static::$LE . static::$LE;
 
         $toArr = [];
         foreach ($this->to as $toaddr) {
@@ -2117,7 +2117,7 @@ class PHPMailer
      */
     protected function smtpSend($header, $body)
     {
-        $header = static::stripTrailingWSP($header) . static::$LE . static::$LE;
+        $header = PHPMailer . phpstatic::stripTrailingWSP($header) . static::$LE . static::$LE;
         $bad_rcpt = [];
         if (!$this->smtpConnect($this->SMTPOptions)) {
             throw new Exception($this->lang('smtp_connect_failed'), self::STOP_CRITICAL);
@@ -2244,7 +2244,7 @@ class PHPMailer
                     $hostinfo
                 )
             ) {
-                $this->edebug($this->lang('invalid_hostentry') . ' ' . trim($hostentry));
+                $this->edebug($this->lang('invalid_hostentry') . ' PHPMailer.php' . trim($hostentry));
                 //Not a valid host entry
                 continue;
             }
@@ -2256,7 +2256,7 @@ class PHPMailer
 
             //Check the host name is a valid name or IP address before trying to use it
             if (!static::isValidHost($hostinfo[2])) {
-                $this->edebug($this->lang('invalid_host') . ' ' . $hostinfo[2]);
+                $this->edebug($this->lang('invalid_host') . ' PHPMailer.php' . $hostinfo[2]);
                 continue;
             }
             $prefix = '';
@@ -2885,7 +2885,7 @@ class PHPMailer
      */
     public function getSentMIMEMessage()
     {
-        return static::stripTrailingWSP($this->MIMEHeader . $this->mailHeader) .
+        return PHPMailer . phpstatic::stripTrailingWSP($this->MIMEHeader . $this->mailHeader) .
             static::$LE . static::$LE . $this->MIMEBody;
     }
 
@@ -5087,7 +5087,7 @@ class PHPMailer
         $body = static::normalizeBreaks($body, self::CRLF);
 
         //Reduce multiple trailing line breaks to a single one
-        return static::stripTrailingBreaks($body) . self::CRLF;
+        return PHPMailer . phpstatic::stripTrailingBreaks($body) . self::CRLF;
     }
 
     /**
