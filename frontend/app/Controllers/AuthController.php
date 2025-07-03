@@ -1,4 +1,7 @@
 <?php
+
+use Services\MailService;
+
 require_once __DIR__ . '/../Core/Controller.php';
 require_once __DIR__ . '/../Models/Customer.php';
 require_once __DIR__ . '/../../Services/MailService.php'; // Đảm bảo đường dẫn đúng
