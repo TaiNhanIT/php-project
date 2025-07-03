@@ -10,6 +10,29 @@ class ProductController extends Controller
             session_start();
         }
     }
+    public function detail($id = '')
+    {
+        if (empty($id) || !is_numeric($id)) {
+            $this->view('error', ['error' => 'Sản phẩm không tồn tại.']);
+            return;
+        }
+
+        $productModel = new Products();
+        $product = $productModel->getProductById($id);
+
+        if (!$product) {
+            $this->view('error', ['error' => 'Sản phẩm không tìm thấy.']);
+            return;
+        }
+
+        $customerId = $_SESSION['customer_id'] ?? null;
+
+        $this->view('products/detail', [
+            'product'     => $product,
+            'message'     => '',
+            'customerId'  => $customerId
+        ]);
+    }
 
     public function productDetail($id = '')
     {

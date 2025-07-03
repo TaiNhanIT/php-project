@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title><?php echo htmlspecialchars($product['product_name']); ?></title>
-    <link rel="stylesheet" href="/public/assets/css/style.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
 <body>
 <div class="container mx-auto p-6">
     <h1 class="text-3xl font-bold mb-4"><?php echo htmlspecialchars($product['product_name']); ?></h1>
@@ -33,5 +25,3 @@
         </div>
     </div>
 </div>
-</body>
-</html>

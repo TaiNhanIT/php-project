@@ -4,15 +4,15 @@
                 intervalTime: 3000,
                 slides: [
                     {
-                        imgSrc: '/assets/images/slider/slider1.jpg',
+                        imgSrc: '/assets/images/slider/e36a04153586409.6332b1f042f2f.png',
                         imgAlt: 'Slider Image',
                     },
                     {
-                        imgSrc: '/assets/images/slider/slider2.jpg',
+                        imgSrc: '/assets/images/slider/galaxy-s24-ultra-highlights-color-carousel-global.webp',
                         imgAlt: 'Slider Image',
                     },
                     {
-                        imgSrc: '/assets/images/slider/slider3.jpg',
+                        imgSrc: '/assets/images/slider/Samsung-Galaxy-S23-Ultra.jpg',
                         imgAlt: 'Slider Image',
                     },
                 ],
@@ -86,40 +86,32 @@
                     foreach ($allProducts as $product) {
                         ?>
                         <div class="w-full bg-white border shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl my-10">
-                            <a class="text-center" href="/product/productDetail&id=<?= htmlspecialchars($product['id']) ?>">
+                            <!-- ĐÃ ĐỔI href: /product/detail/{id} -->
+                            <a class="text-center" href="/product/detail/<?= htmlspecialchars($product['id']) ?>">
                                 <img src="/assets/images/<?= htmlspecialchars($product['image']) ?>" alt="Product" class="h-80 m-auto object-cover rounded-t-xl p-10" />
                                 <div class="px-4 py-3">
                                     <span class="text-gray-400 mr-3 uppercase text-xs">Brand</span>
                                     <p class="text-lg font-bold text-black truncate block capitalize"><?= htmlspecialchars($product['product_name']) ?></p>
+
+                                    <!-- rating icons giữ nguyên -->
                                     <div class="flex gap-0.5 items-center justify-center py-2.5">
-                                        <svg class="h-4 w-4 shrink-0 fill-amber-400" viewBox="0 0 256 256">
-                                            <path d="M239.2 97.4A16.4 16.4.0 00224.6 86l-59.4-4.1-22-55.5A16.4 16.4.0 00128 16h0a16.4 16.4.0 00-15.2 10.4L90.4 82.2 31.4 86A16.5 16.5.0 0016.8 97.4 16.8 16.8.0 0022 115.5l45.4 38.4L53.9 207a18.5 18.5.0 007 19.6 18 18 0 0020.1.6l46.9-29.7h.2l50.5 31.9a16.1 16.1.0 008.7 2.6 16.5 16.5.0 0015.8-20.8l-14.3-58.1L234 115.5A16.8 16.8.0 00239.2 97.4z"></path>
-                                        </svg>
-                                        <svg class="h-4 w-4 shrink-0 fill-amber-400" viewBox="0 0 256 256">
-                                            <path d="M239.2 97.4A16.4 16.4.0 00224.6 86l-59.4-4.1-22-55.5A16.4 16.4.0 00128 16h0a16.4 16.4.0 00-15.2 10.4L90.4 82.2 31.4 86A16.5 16.5.0 0016.8 97.4 16.8 16.8.0 0022 115.5l45.4 38.4L53.9 207a18.5 18.5.0 007 19.6 18 18 0 0020.1.6l46.9-29.7h.2l50.5 31.9a16.1 16.1.0 008.7 2.6 16.5 16.5.0 0015.8-20.8l-14.3-58.1L234 115.5A16.8 16.8.0 00239.2 97.4z"></path>
-                                        </svg>
-                                        <svg class="h-4 w-4 shrink-0 fill-amber-400" viewBox="0 0 256 256">
-                                            <path d="M239.2 97.4A16.4 16.4.0 00224.6 86l-59.4-4.1-22-55.5A16.4 16.4.0 00128 16h0a16.4 16.4.0 00-15.2 10.4L90.4 82.2 31.4 86A16.5 16.5.0 0016.8 97.4 16.8 16.8.0 0022 115.5l45.4 38.4L53.9 207a18.5 18.5.0 007 19.6 18 18 0 0020.1.6l46.9-29.7h.2l50.5 31.9a16.1 16.1.0 008.7 2.6 16.5 16.5.0 0015.8-20.8l-14.3-58.1L234 115.5A16.8 16.8.0 00239.2 97.4z"></path>
-                                        </svg>
-                                        <svg class="h-4 w-4 shrink-0 fill-amber-400" viewBox="0 0 256 256">
-                                            <path d="M239.2 97.4A16.4 16.4.0 00224.6 86l-59.4-4.1-22-55.5A16.4 16.4.0 00128 16h0a16.4 16.4.0 00-15.2 10.4L90.4 82.2 31.4 86A16.5 16.5.0 0016.8 97.4 16.8 16.8.0 0022 115.5l45.4 38.4L53.9 207a18.5 18.5.0 007 19.6 18 18 0 0020.1.6l46.9-29.7h.2l50.5 31.9a16.1 16.1.0 008.7 2.6 16.5 16.5.0 0015.8-20.8l-14.3-58.1L234 115.5A16.8 16.8.0 00239.2 97.4z"></path>
-                                        </svg>
-                                        <svg class="h-4 w-4 shrink-0 fill-gray-300" viewBox="0 0 256 256">
-                                            <path d="M239.2 97.4A16.4 16.4.0 00224.6 86l-59.4-4.1-22-55.5A16.4 16.4.0 00128 16h0a16.4 16.4.0 00-15.2 10.4L90.4 82.2 31.4 86A16.5 16.5.0 0016.8 97.4 16.8 16.8.0 0022 115.5l45.4 38.4L53.9 207a18.5 18.5.0 007 19.6 18 18 0 0020.1.6l46.9-29.7h.2l50.5 31.9a16.1 16.1.0 008.7 2.6 16.5 16.5.0 0015.8-20.8l-14.3-58.1L234 115.5A16.8 16.8.0 00239.2 97.4z"></path>
-                                        </svg>
+                                        <!-- 4 sao vàng, 1 sao xám -->
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <svg class="h-4 w-4 shrink-0 <?= $i <= 4 ? 'fill-amber-400' : 'fill-gray-300' ?>" viewBox="0 0 256 256">
+                                                <path d="M239.2 97.4A16.4 16.4 0 00224.6 86l-59.4-4.1-22-55.5A16.4 16.4 0 00128 16a16.4 16.4 0 00-15.2 10.4L90.4 82.2 31.4 86A16.5 16.5 0 0016.8 97.4a16.8 16.8 0 005.2 18.1l45.4 38.4-14.3 58.1a18.5 18.5 0 007 19.6 18 18 0 0020.1.6l46.9-29.7 50.5 31.9a16.1 16.1 0 008.7 2.6 16.5 16.5 0 0015.8-20.8L182 153.9l45.4-38.4a16.8 16.8 0 0011.8-18.1z"></path>
+                                            </svg>
+                                        <?php endfor; ?>
                                     </div>
+
                                     <div class="flex items-center">
-                                        <p class="text-lg font-semibold text-black cursor-auto my-3"><?= number_format($product['price'], 0, ',', '.') ?> VNĐ</p>
+                                        <p class="text-lg font-semibold text-black my-3"><?= number_format($product['price'], 0, ',', '.') ?> VNĐ</p>
                                         <div class="ml-auto">
                                             <form method="post" action="/cart/add/<?= $product['id'] ?>">
                                                 <input type="hidden" name="quantity" value="1">
                                                 <button type="submit" title="Add to Cart">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                                                         class="bi bi-bag-plus" viewBox="0 0 16 16">
-                                                        <path fill-rule="evenodd"
-                                                              d="M8 7.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0v-1.5H6a.5.5 0 0 1 0-1h1.5V8a.5.5 0 0 1 .5-.5z"/>
-                                                        <path
-                                                                d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-bag-plus" viewBox="0 0 16 16">
+                                                        <path fill-rule="evenodd" d="M8 7.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V12a.5.5 0 0 1-1 0v-1.5H6a.5.5 0 0 1 0-1h1.5V8a.5.5 0 0 1 .5-.5z"/>
+                                                        <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4h-3.5zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5z"/>
                                                     </svg>
                                                 </button>
                                             </form>
@@ -281,7 +273,5 @@
     </script>
 
     <style>
-        .owl-stage-outer {
-            overflow: unset !important;
-        }
+        .owl-stage-outer { overflow: unset !important; }
     </style>

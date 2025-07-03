@@ -14,11 +14,21 @@ class Cart
         }
     }
 
-    public function addToCart($productId, $customerId)
+    public function addToCart($customerId, $productId, $quantity = 1)
     {
-        $stmt = $this->dbh->prepare("INSERT INTO cart (customer_id, product_id, quantity) VALUES (?, ?, 1) 
-                                ON DUPLICATE KEY UPDATE quantity = quantity + 1");
-        return $stmt->execute([$customerId, $productId]);
+        try {
+            error_log("Adding to cart: customerId=$customerId, productId=$productId, quantity=$quantity");
+            $stmt = $this->dbh->prepare("INSERT INTO cart (customer_id, product_id, quantity) VALUES (?, ?, ?) 
+                                    ON DUPLICATE KEY UPDATE quantity = quantity + ?");
+            $result = $stmt->execute([$customerId, $productId, $quantity, $quantity]);
+            if (!$result) {
+                error_log("Failed to add to cart: " . print_r($stmt->errorInfo(), true));
+            }
+            return $result;
+        } catch (PDOException $e) {
+            error_log("Database error in addToCart: " . $e->getMessage());
+            return false;
+        }
     }
 
     public function getCartItems($customerId)

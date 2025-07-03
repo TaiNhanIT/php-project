@@ -71,73 +71,87 @@ class CartController extends Controller
 
     public function add($productId = '')
     {
-        $customerId = $_SESSION['customer_id'] ?? null;
-        if (!$customerId) {
-            $_SESSION['error_message'] = 'Vui lòng đăng nhập để thêm vào giỏ hàng!';
-            $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-            header('Location: ' . $referer);
-            exit;
-        }
+        try {
+            $customerId = $_SESSION['customer_id'] ?? null;
+            error_log("Attempting to add product with ID: $productId, Customer ID: " . ($customerId ?? 'Not set') . ", URL: " . $_SERVER['REQUEST_URI']);
 
-        if (empty($productId) || !is_numeric($productId)) {
-            $_SESSION['error_message'] = 'Sản phẩm không hợp lệ!';
-            $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-            header('Location: ' . $referer);
-            exit;
-        }
-
-        $product = $this->productModel->getProductById($productId);
-        if (!$product) {
-            $_SESSION['error_message'] = 'Sản phẩm không tồn tại hoặc hết hàng!';
-            $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-            header('Location: ' . $referer);
-            exit;
-        }
-
-        if (empty($product['product_name']) || !isset($product['product_name'])) {
-            error_log("Lỗi: Sản phẩm ID $productId không có product_name hợp lệ: " . print_r($product, true));
-            $_SESSION['error_message'] = 'Dữ liệu sản phẩm không hợp lệ!';
-            $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-            header('Location: ' . $referer);
-            exit;
-        }
-
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-
-        $quantity = isset($_POST['quantity']) && is_numeric($_POST['quantity']) ? intval($_POST['quantity']) : 1;
-        if ($quantity > $product['stock_quantity']) {
-            $_SESSION['error_message'] = 'Số lượng vượt quá tồn kho!';
-            $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-            header('Location: ' . $referer);
-            exit;
-        }
-
-        $found = false;
-        foreach ($_SESSION['cart'] as &$item) {
-            if ($item['id'] == $productId) {
-                $item['quantity'] += $quantity;
-                $this->cartModel->updateCartItem($customerId, $productId, $item['quantity']);
-                $found = true;
-                break;
+            if (!$customerId) {
+                $_SESSION['error_message'] = 'Vui lòng đăng nhập để thêm vào giỏ hàng!';
+                $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+                header('Location: ' . $referer);
+                exit;
             }
-        }
 
-        if (!$found) {
-            $_SESSION['cart'][] = [
-                'id' => $productId,
-                'name' => $product['product_name'] ?? 'Tên không xác định',
-                'price' => $product['price'] ?? 0,
-                'quantity' => $quantity,
-                'image' => $product['image'] ?? 'default.jpg'
-            ];
-            $this->cartModel->addToCart($productId, $customerId);
-        }
+            if (empty($productId) || !is_numeric($productId)) {
+                error_log("Invalid product ID received: $productId, from URL: " . $_SERVER['REQUEST_URI']);
+                $_SESSION['error_message'] = 'Sản phẩm không hợp lệ! (ID không đúng: ' . htmlspecialchars($productId) . ')';
+                $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+                header('Location: ' . $referer);
+                exit;
+            }
 
-        $_SESSION['success_message'] = 'Thêm vào giỏ hàng thành công!';
-        $referer = $_SERVER['HTTP_REFERER'] ?? '/';
-        header('Location: ' . $referer);
-        exit;
+            $product = $this->productModel->getProductById($productId);
+            error_log("Product fetched for ID $productId: " . print_r($product, true));
+            if (!$product) {
+                error_log("Product not found for ID: $productId");
+                $_SESSION['error_message'] = 'Sản phẩm không tồn tại hoặc hết hàng!';
+                $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+                header('Location: ' . $referer);
+                exit;
+            }
+
+            if (empty($product['product_name']) || !isset($product['product_name'])) {
+                error_log("Invalid product data for ID $productId: " . print_r($product, true));
+                $_SESSION['error_message'] = 'Dữ liệu sản phẩm không hợp lệ!';
+                $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+                header('Location: ' . $referer);
+                exit;
+            }
+
+            if (!isset($_SESSION['cart'])) {
+                $_SESSION['cart'] = [];
+            }
+
+            $quantity = isset($_POST['quantity']) && is_numeric($_POST['quantity']) ? intval($_POST['quantity']) : 1;
+            error_log("Requested quantity: $quantity, Stock: " . ($product['stock_quantity'] ?? 'N/A'));
+            if ($quantity > ($product['stock_quantity'] ?? 0)) {
+                $_SESSION['error_message'] = 'Số lượng vượt quá tồn kho!';
+                $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+                header('Location: ' . $referer);
+                exit;
+            }
+
+            $found = false;
+            foreach ($_SESSION['cart'] as &$item) {
+                if ($item['id'] == $productId) {
+                    $item['quantity'] += $quantity;
+                    $this->cartModel->updateCartItem($customerId, $productId, $item['quantity']);
+                    $found = true;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                $_SESSION['cart'][] = [
+                    'id' => $productId,
+                    'name' => $product['product_name'] ?? 'Tên không xác định',
+                    'price' => $product['price'] ?? 0,
+                    'quantity' => $quantity,
+                    'image' => $product['image'] ?? 'default.jpg'
+                ];
+                $this->cartModel->addToCart($customerId, $productId, $quantity);
+            }
+
+            $_SESSION['success_message'] = 'Thêm vào giỏ hàng thành công!';
+            $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+            header('Location: ' . $referer);
+            exit;
+        } catch (Exception $e) {
+            error_log("Error in add: " . $e->getMessage() . ", URL: " . $_SERVER['REQUEST_URI']);
+            $_SESSION['error_message'] = 'Lỗi hệ thống khi thêm sản phẩm!';
+            $referer = $_SERVER['HTTP_REFERER'] ?? '/';
+            header('Location: ' . $referer);
+            exit;
+        }
     }
 }
