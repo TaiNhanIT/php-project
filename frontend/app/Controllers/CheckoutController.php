@@ -67,14 +67,19 @@ class CheckoutController extends Controller
             $detail = trim($_POST['detail'] ?? '');
 
             if (!empty($name) && !empty($phone) && !empty($street) && !empty($city) && !empty($country_code)) {
-                $stmt = $this->dbh->prepare("INSERT INTO customer_address (customer_id, name, phone, street, city, country_code, detail) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$customer_id, $name, $phone, $street, $city, $country_code, $detail]);
-                $lastId = $this->dbh->lastInsertId();
-                $stmt = $this->dbh->prepare("SELECT name, phone, street, city, country_code, detail FROM customer_address WHERE id = ? AND customer_id = ?");
-                $stmt->execute([$lastId, $customer_id]);
-                $address = $stmt->fetch(PDO::FETCH_ASSOC);
-                $_SESSION['selected_address'] = json_encode($address);
-                $_SESSION['message'] = 'Địa chỉ đã được lưu thành công!';
+                try {
+                    $stmt = $this->dbh->prepare("INSERT INTO customer_address (customer_id, name, phone, street, city, country_code, detail) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                    $stmt->execute([$customer_id, $name, $phone, $street, $city, $country_code, $detail]);
+                    $lastId = $this->dbh->lastInsertId();
+                    $stmt = $this->dbh->prepare("SELECT name, phone, street, city, country_code, detail FROM customer_address WHERE id = ? AND customer_id = ?");
+                    $stmt->execute([$lastId, $customer_id]);
+                    $address = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $_SESSION['selected_address'] = json_encode($address);
+                    $_SESSION['message'] = 'Địa chỉ đã được lưu thành công!';
+                } catch (PDOException $e) {
+                    error_log("Database error in saveAddress: " . $e->getMessage());
+                    $_SESSION['error_message'] = 'Lỗi khi lưu địa chỉ. Vui lòng thử lại!';
+                }
             } else {
                 $_SESSION['error_message'] = 'Vui lòng điền đầy đủ thông tin!';
             }
@@ -169,13 +174,22 @@ class CheckoutController extends Controller
 
     private function getCustomerAddresses()
     {
-        $customer_id = $_SESSION['customer_id'] ?? null;
-        if ($customer_id) {
+        try {
+            $customer_id = $_SESSION['customer_id'] ?? null;
+            error_log("Fetching addresses for customerId: $customer_id");
+            if (!$customer_id) {
+                return [];
+            }
+
             $stmt = $this->dbh->prepare("SELECT id, name, phone, street, city, country_code, detail FROM customer_address WHERE customer_id = ? ORDER BY id ASC");
             $stmt->execute([$customer_id]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $addresses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            error_log("Fetched addresses: " . print_r($addresses, true));
+            return $addresses;
+        } catch (PDOException $e) {
+            error_log("Database error in getCustomerAddresses: " . $e->getMessage());
+            return [];
         }
-        return [];
     }
 
     // Phương thức giả định (cần triển khai)

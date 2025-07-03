@@ -5,11 +5,24 @@ class Controller
     {
         extract($data);
         $basePath = dirname(__DIR__) . '/Views/';
-        if (!file_exists($basePath . 'partials/header.php') || !file_exists($basePath . str_replace('/', DIRECTORY_SEPARATOR, $view) . '.php') || !file_exists($basePath . 'partials/footer.php')) {
-            die("Debug: View file missing for $view");
+        $headerPath = $basePath . 'partials/header.php';
+        $viewPath = $basePath . str_replace('/', DIRECTORY_SEPARATOR, $view) . '.php';
+        $footerPath = $basePath . 'partials/footer.php';
+
+        if (!file_exists($headerPath) || !file_exists($viewPath) || !file_exists($footerPath)) {
+            error_log("View file missing: header=$headerPath, view=$viewPath, footer=$footerPath");
+            // Fallback đến trang lỗi 404
+            $errorViewPath = $basePath . 'errors/404.php';
+            if (file_exists($errorViewPath)) {
+                require_once $errorViewPath;
+            } else {
+                echo "Debug: View file missing for $view and no fallback available.";
+            }
+            return;
         }
-        require_once $basePath . 'partials/header.php';
-        require_once $basePath . str_replace('/', DIRECTORY_SEPARATOR, $view) . '.php';
-        require_once $basePath . 'partials/footer.php';
+
+        require_once $headerPath;
+        require_once $viewPath;
+        require_once $footerPath;
     }
 }

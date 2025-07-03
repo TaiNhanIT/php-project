@@ -13,6 +13,9 @@ $urlSegments = explode('/', $url);
 $controller = !empty($urlSegments[0]) ? $urlSegments[0] : 'home';
 $action = isset($urlSegments[1]) ? $urlSegments[1] : 'index';
 
+// Extract additional parameters (e.g., productId from /cart/add/1)
+$params = array_slice($urlSegments, 2);
+
 // Build controller class name
 $controllerName = ucfirst($controller) . 'Controller';
 
@@ -41,5 +44,9 @@ if (!method_exists($controllerObj, $action)) {
     exit;
 }
 
-// Call action, optionally pass further URL segments as params if you want
-$controllerObj->$action();
+// Call action with parameters
+if (!empty($params)) {
+    call_user_func_array([$controllerObj, $action], $params);
+} else {
+    $controllerObj->$action();
+}
