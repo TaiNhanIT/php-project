@@ -56,4 +56,10 @@ class Cart
         $stmt = $this->dbh->prepare("DELETE FROM cart WHERE customer_id = ? AND product_id = ?");
         return $stmt->execute([$customerId, $productId]);
     }
+
+    public function clearCart($customerId)
+    {
+        $stmt = $this->dbh->prepare("DELETE FROM cart WHERE customer_id = ?");
+        return $stmt->execute([$customerId]);
+    }
 }

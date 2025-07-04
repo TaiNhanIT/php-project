@@ -21,6 +21,17 @@ class CheckoutController extends Controller
         }
         $this->productModel = new Products();
         $this->cartModel = new Cart();
+        $this->refreshCartIfNeeded(); // Làm mới giỏ hàng nếu cần
+    }
+
+    private function refreshCartIfNeeded()
+    {
+        $customerId = $_SESSION['customer_id'] ?? null;
+        if ($customerId && (!isset($_SESSION['last_customer_id']) || $_SESSION['last_customer_id'] != $customerId)) {
+            $cartItems = $this->cartModel->getCartItems($customerId);
+            $_SESSION['cart'] = $cartItems ?: [];
+            $_SESSION['last_customer_id'] = $customerId; // Lưu customer_id cuối cùng
+        }
     }
 
     public function index()
@@ -31,9 +42,8 @@ class CheckoutController extends Controller
         $selected_address = isset($_SESSION['selected_address']) ? $_SESSION['selected_address'] : '';
         $message = $_SESSION['message'] ?? '';
 
-        if (isset($_SESSION['customer_id'])) {
-            // Lấy danh sách sản phẩm từ database thông qua Cart model
-            $cart_items = $this->cartModel->getCartItems($_SESSION['customer_id']);
+        if (isset($_SESSION['customer_id']) || !empty($_SESSION['cart'])) {
+            $cart_items = $this->cartModel->getCartItems($_SESSION['customer_id'] ?? null);
             foreach ($cart_items as $item) {
                 $total += $item['price'] * $item['quantity'];
             }
@@ -53,8 +63,8 @@ class CheckoutController extends Controller
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_address'])) {
             $customer_id = $_SESSION['customer_id'] ?? null;
-            if (!$customer_id) {
-                $_SESSION['error_message'] = 'Vui lòng đăng nhập để lưu địa chỉ!';
+            if (!$customer_id && !isset($_SESSION['guest_info'])) {
+                $_SESSION['error_message'] = 'Vui lòng đăng nhập hoặc nhập thông tin khách để lưu địa chỉ!';
                 header('Location: /checkout');
                 exit;
             }
@@ -71,14 +81,14 @@ class CheckoutController extends Controller
                     $stmt = $this->dbh->prepare("INSERT INTO customer_address (customer_id, name, phone, street, city, country_code, detail) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     $stmt->execute([$customer_id, $name, $phone, $street, $city, $country_code, $detail]);
                     $lastId = $this->dbh->lastInsertId();
-                    $stmt = $this->dbh->prepare("SELECT name, phone, street, city, country_code, detail FROM customer_address WHERE id = ? AND customer_id = ?");
+                    $stmt = $this->dbh->prepare("SELECT id, name, phone, street, city, country_code, detail FROM customer_address WHERE id = ? AND customer_id = ?");
                     $stmt->execute([$lastId, $customer_id]);
                     $address = $stmt->fetch(PDO::FETCH_ASSOC);
-                    $_SESSION['selected_address'] = json_encode($address);
+                    $_SESSION['selected_address'] = json_encode($address); // Lưu toàn bộ địa chỉ bao gồm id
                     $_SESSION['message'] = 'Địa chỉ đã được lưu thành công!';
                 } catch (PDOException $e) {
                     error_log("Database error in saveAddress: " . $e->getMessage());
-                    $_SESSION['error_message'] = 'Lỗi khi lưu địa chỉ. Vui lòng thử lại!';
+                    $_SESSION['error_message'] = 'Lỗi khi lưu địa chỉ. Vui lòng thử lại! Chi tiết: ' . $e->getMessage();
                 }
             } else {
                 $_SESSION['error_message'] = 'Vui lòng điền đầy đủ thông tin!';
@@ -89,11 +99,11 @@ class CheckoutController extends Controller
             $address_id = $_POST['select_address_id'];
             $customer_id = $_SESSION['customer_id'] ?? null;
             if ($customer_id && is_numeric($address_id)) {
-                $stmt = $this->dbh->prepare("SELECT name, phone, street, city, country_code, detail FROM customer_address WHERE id = ? AND customer_id = ?");
+                $stmt = $this->dbh->prepare("SELECT id, name, phone, street, city, country_code, detail FROM customer_address WHERE id = ? AND customer_id = ?");
                 $stmt->execute([$address_id, $customer_id]);
                 $address = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($address) {
-                    $_SESSION['selected_address'] = json_encode($address);
+                    $_SESSION['selected_address'] = json_encode($address); // Lưu toàn bộ địa chỉ
                     $_SESSION['message'] = 'Địa chỉ đã được chọn!';
                 } else {
                     $_SESSION['error_message'] = 'Địa chỉ không hợp lệ!';
@@ -120,9 +130,7 @@ class CheckoutController extends Controller
                     $_SESSION['message'] = 'Địa chỉ đã được xóa thành công!';
                     $addresses = $this->getCustomerAddresses();
                     if (!empty($addresses)) {
-                        // Chọn địa chỉ đầu tiên làm mặc định nếu còn địa chỉ
-                        $firstAddress = $addresses[0];
-                        $_SESSION['selected_address'] = json_encode(array_diff_key($firstAddress, ['id' => '']));
+                        $_SESSION['selected_address'] = json_encode($addresses[0]);
                     } else {
                         unset($_SESSION['selected_address']);
                     }
@@ -145,29 +153,44 @@ class CheckoutController extends Controller
             $shipping_method = $_POST['shipping_method'] ?? 'standard';
             $payment_method = $_POST['payment_method'] ?? 'cod';
 
-            $cart_items = $this->cartModel->getCartItems($customer_id);
+            // Lấy thông tin khách nếu không đăng nhập
+            $customer_name = $customer_id ? ($_SESSION['customer_name'] ?? '') : trim($_POST['customer_name'] ?? '');
+            $customer_email = $customer_id ? ($_SESSION['customer_email'] ?? '') : trim($_POST['customer_email'] ?? '');
+            $customer_phone = $customer_id ? ($_SESSION['customer_phone'] ?? '') : trim($_POST['customer_phone'] ?? '');
+
+            if (!$customer_id && (!empty($customer_name) || !empty($customer_email) || !empty($customer_phone))) {
+                $_SESSION['guest_info'] = [
+                    'name' => $customer_name,
+                    'email' => $customer_email,
+                    'phone' => $customer_phone
+                ];
+            }
+
+            $cart_items = $this->cartModel->getCartItems($customer_id ?? null);
             $total = 0;
             foreach ($cart_items as $item) {
                 $total += $item['price'] * $item['quantity'];
             }
 
-            if (empty($address) || empty($cart_items)) {
-                $_SESSION['error_message'] = 'Vui lòng chọn địa chỉ và kiểm tra giỏ hàng.';
+            if (empty($address) || empty($cart_items) || (!$customer_id && (empty($customer_name) || empty($customer_email) || empty($customer_phone)))) {
+                $_SESSION['error_message'] = 'Vui lòng chọn địa chỉ và nhập đầy đủ thông tin khách (nếu không đăng nhập) hoặc kiểm tra giỏ hàng.';
                 header('Location: /checkout');
                 exit;
             }
 
-            // Lưu vào session để chuyển sang trang order xử lý
-            $_SESSION['order_data'] = [
-                'customer_id' => $customer_id,
-                'address' => $address,
-                'shipping_method' => $shipping_method,
-                'payment_method' => $payment_method,
-                'total' => $total,
-                'cart_items' => $cart_items
-            ];
-
-            header('Location: /order/confirm');
+            $orderId = $this->saveOrder($customer_id, $customer_name, $customer_email, $customer_phone, $address, $shipping_method, $payment_method, $total);
+            if ($orderId) {
+                foreach ($cart_items as $item) {
+                    $this->saveOrderDetail($orderId, $item['product_id'], $item['quantity'], $item['price']);
+                    $this->updateStock($item['product_id'], $item['quantity']);
+                }
+                $this->cartModel->clearCart($customer_id ?? null);
+                $_SESSION['message'] = 'Đặt hàng thành công!';
+                header('Location: /order/success');
+            } else {
+                $_SESSION['error_message'] = 'Lỗi khi đặt hàng. Vui lòng thử lại!';
+                header('Location: /checkout');
+            }
             exit;
         }
     }
@@ -192,8 +215,36 @@ class CheckoutController extends Controller
         }
     }
 
-    // Phương thức giả định (cần triển khai)
-    private function saveOrder($customer_id, $address, $shipping_method, $payment_method, $total) { return 1; }
-    private function saveOrderDetail($order_id, $product_id, $quantity, $price) {}
-    private function updateStock($product_id, $quantity) {}
+    private function saveOrder($customer_id, $customer_name, $customer_email, $customer_phone, $address, $shipping_method, $payment_method, $total)
+    {
+        try {
+            $stmt = $this->dbh->prepare("INSERT INTO orders (customer_id, customer_name, customer_email, customer_phone, address, shipping_method, payment_method, total, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, NOW())");
+            $addressJson = json_encode($address);
+            $stmt->execute([$customer_id, $customer_name, $customer_email, $customer_phone, $addressJson, $shipping_method, $payment_method, $total]);
+            return $this->dbh->lastInsertId();
+        } catch (PDOException $e) {
+            error_log("Database error in saveOrder: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    private function saveOrderDetail($order_id, $product_id, $quantity, $price)
+    {
+        try {
+            $stmt = $this->dbh->prepare("INSERT INTO order_details (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$order_id, $product_id, $quantity, $price]);
+        } catch (PDOException $e) {
+            error_log("Database error in saveOrderDetail: " . $e->getMessage());
+        }
+    }
+
+    private function updateStock($product_id, $quantity)
+    {
+        try {
+            $stmt = $this->dbh->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?");
+            $stmt->execute([$quantity, $product_id, $quantity]);
+        } catch (PDOException $e) {
+            error_log("Database error in updateStock: " . $e->getMessage());
+        }
+    }
 }

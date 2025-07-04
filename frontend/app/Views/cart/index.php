@@ -18,8 +18,8 @@
             <?php
             $total = 0;
             foreach ($_SESSION['cart'] as $item):
-                $name = $item['name'] ?? 'Tên không xác định';
-                $id = $item['id'] ?? 0;
+                $name = $item['product_name'] ?? 'Tên không xác định';
+                $productId = $item['product_id'] ?? 0;
                 $price = $item['price'] ?? 0;
                 $quantity = $item['quantity'] ?? 1;
                 $image = $item['image'] ?? 'default.jpg';
@@ -33,7 +33,7 @@
                     <td class="p-3"><?php echo number_format($price, 0, ',', '.'); ?> VNĐ</td>
                     <td class="p-3">
                         <form method="post" action="/cart/index" class="inline">
-                            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($id); ?>">
+                            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($productId); ?>">
                             <input type="number" name="quantity" value="<?php echo htmlspecialchars($quantity); ?>" min="1" class="w-16 p-1 border rounded" required>
                             <button type="submit" name="update" class="ml-2 bg-blue-500 text-white p-1 rounded">Cập nhật</button>
                         </form>
@@ -41,7 +41,7 @@
                     <td class="p-3"><?php echo number_format($item_total, 0, ',', '.'); ?> VNĐ</td>
                     <td class="p-3">
                         <form method="post" action="/cart/index" class="inline">
-                            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($id); ?>">
+                            <input type="hidden" name="product_id" value="<?php echo htmlspecialchars($productId); ?>">
                             <button type="submit" name="remove" class="bg-red-500 text-white p-1 rounded">Xóa</button>
                         </form>
                     </td>
@@ -55,5 +55,3 @@
         </div>
     <?php endif; ?>
 </div>
-</body>
-</html>

@@ -5,14 +5,18 @@ use Services\MailService;
 require_once __DIR__ . '/../Core/Controller.php';
 require_once __DIR__ . '/../Models/Customer.php';
 require_once __DIR__ . '/../../Services/MailService.php'; // Đảm bảo đường dẫn đúng
+require_once __DIR__ . '/../Controllers/CartController.php'; // Thêm để gọi refreshCart
 
 class AuthController extends Controller
 {
+    private $cartController;
+
     public function __construct()
     {
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
+        $this->cartController = new CartController(); // Khởi tạo để gọi refreshCart
     }
 
     public function login()
@@ -38,6 +42,8 @@ class AuthController extends Controller
                 $_SESSION['customer_id'] = $customer['id'];
                 $_SESSION['customer_email'] = $customer['email'];
                 $_SESSION['customer_name'] = trim($customer['first_name'] . ' ' . $customer['last_name']);
+                // Làm mới giỏ hàng sau khi đăng nhập
+                $this->cartController->refreshCart();
                 header('Location: /');
                 exit;
             } else {
@@ -202,10 +208,11 @@ class AuthController extends Controller
     public function logout()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        // Xóa thông tin session của khách hàng
+        // Xóa thông tin session của khách hàng và giỏ hàng
         unset($_SESSION['customer_id']);
         unset($_SESSION['customer_email']);
         unset($_SESSION['customer_name']);
+        unset($_SESSION['cart']); // Xóa giỏ hàng trong session khi đăng xuất
         header('Location: /auth/login');
         exit;
     }
