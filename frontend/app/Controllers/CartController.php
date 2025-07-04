@@ -15,6 +15,18 @@ class CartController extends Controller
         }
         $this->productModel = new Products();
         $this->cartModel = new Cart();
+        $this->refreshCart(); // Làm mới giỏ hàng khi khởi tạo
+    }
+
+    public function refreshCart()
+    {
+        $customerId = $_SESSION['customer_id'] ?? null;
+        if ($customerId) {
+            $cartItems = $this->cartModel->getCartItems($customerId);
+            $_SESSION['cart'] = $cartItems ?: [];
+        } else {
+            $_SESSION['cart'] = [];
+        }
     }
 
     public function index()
@@ -26,38 +38,38 @@ class CartController extends Controller
 
         if (!$customerId) {
             $error = 'Vui lòng đăng nhập để xem giỏ hàng!';
-        }
-
-        if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {
-            $error = 'Giỏ hàng của bạn trống.';
         } else {
+            $this->refreshCart(); // Đảm bảo giỏ hàng luôn cập nhật
             $cartItems = $_SESSION['cart'];
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                if (isset($_POST['update'])) {
-                    $productId = $_POST['product_id'];
-                    $quantity = (int)$_POST['quantity'];
-                    foreach ($cartItems as &$item) {
-                        if ($item['id'] == $productId) {
-                            $item['quantity'] = $quantity > 0 ? $quantity : 1;
-                            $this->cartModel->updateCartItem($customerId, $productId, $quantity > 0 ? $quantity : 1);
-                            break;
+            if (empty($cartItems)) {
+                $error = 'Giỏ hàng của bạn trống.';
+            } else {
+                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                    if (isset($_POST['update'])) {
+                        $productId = $_POST['product_id'];
+                        $quantity = (int)$_POST['quantity'];
+                        $success = $this->cartModel->updateCartItem($customerId, $productId, $quantity > 0 ? $quantity : 1);
+                        if ($success) {
+                            $this->refreshCart(); // Làm mới session sau khi cập nhật
+                        } else {
+                            error_log("Failed to update cart item: customerId=$customerId, productId=$productId, quantity=$quantity");
+                        }
+                    } elseif (isset($_POST['remove'])) {
+                        $productId = $_POST['product_id'];
+                        $success = $this->cartModel->removeFromCart($customerId, $productId);
+                        if ($success) {
+                            $this->refreshCart(); // Làm mới session sau khi xóa
+                        } else {
+                            error_log("Failed to remove cart item: customerId=$customerId, productId=$productId");
                         }
                     }
-                    $_SESSION['cart'] = $cartItems;
-                } elseif (isset($_POST['remove'])) {
-                    $productId = $_POST['product_id'];
-                    $_SESSION['cart'] = array_filter($cartItems, function ($item) use ($productId) {
-                        return $item['id'] != $productId;
-                    });
-                    $_SESSION['cart'] = array_values($_SESSION['cart']);
-                    $this->cartModel->removeFromCart($customerId, $productId);
+                    header('Location: /cart/index');
+                    exit;
                 }
-                header('Location: /cart/index');
-                exit;
-            }
 
-            foreach ($cartItems as $item) {
-                $total += $item['price'] * $item['quantity'];
+                foreach ($cartItems as $item) {
+                    $total += $item['price'] * $item['quantity'];
+                }
             }
         }
 
@@ -108,10 +120,6 @@ class CartController extends Controller
                 exit;
             }
 
-            if (!isset($_SESSION['cart'])) {
-                $_SESSION['cart'] = [];
-            }
-
             $quantity = isset($_POST['quantity']) && is_numeric($_POST['quantity']) ? intval($_POST['quantity']) : 1;
             error_log("Requested quantity: $quantity, Stock: " . ($product['stock_quantity'] ?? 'N/A'));
             if ($quantity > ($product['stock_quantity'] ?? 0)) {
@@ -122,25 +130,28 @@ class CartController extends Controller
             }
 
             $found = false;
-            foreach ($_SESSION['cart'] as &$item) {
-                if ($item['id'] == $productId) {
-                    $item['quantity'] += $quantity;
-                    $this->cartModel->updateCartItem($customerId, $productId, $item['quantity']);
+            $cartItems = $this->cartModel->getCartItems($customerId); // Lấy từ database
+            foreach ($cartItems as &$item) {
+                if ($item['product_id'] == $productId) {
+                    $newQuantity = $item['quantity'] + $quantity;
+                    $item['quantity'] = $newQuantity;
+                    $this->cartModel->updateCartItem($customerId, $productId, $newQuantity);
                     $found = true;
                     break;
                 }
             }
 
             if (!$found) {
-                $_SESSION['cart'][] = [
-                    'id' => $productId,
-                    'name' => $product['product_name'] ?? 'Tên không xác định',
+                $cartItems[] = [
+                    'product_id' => $productId,
+                    'product_name' => $product['product_name'] ?? 'Tên không xác định',
                     'price' => $product['price'] ?? 0,
                     'quantity' => $quantity,
                     'image' => $product['image'] ?? 'default.jpg'
                 ];
                 $this->cartModel->addToCart($customerId, $productId, $quantity);
             }
+            $_SESSION['cart'] = $cartItems; // Đồng bộ với database
 
             $_SESSION['success_message'] = 'Thêm vào giỏ hàng thành công!';
             $referer = $_SERVER['HTTP_REFERER'] ?? '/';

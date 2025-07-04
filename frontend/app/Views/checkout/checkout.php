@@ -121,7 +121,6 @@
                 <?php foreach ($cart_items as $item): ?>
                     <li class="flex items-center">
                         <?php
-                        // Debug: Kiểm tra giá trị image
                         $imagePath = !empty($item['image']) ? '/assets/images/' . htmlspecialchars($item['image']) : '/placeholder.jpg';
                         error_log("Image path for product ID {$item['product_id']}: $imagePath");
                         ?>
