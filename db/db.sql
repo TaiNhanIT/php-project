@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: db
--- Thời gian đã tạo: Th7 03, 2025 lúc 07:53 AM
+-- Thời gian đã tạo: Th7 04, 2025 lúc 04:36 PM
 -- Phiên bản máy phục vụ: 8.0.42
 -- Phiên bản PHP: 8.2.27
 
@@ -20,6 +20,28 @@ SET time_zone = "+00:00";
 --
 -- Cơ sở dữ liệu: `php-project`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `cart`
+--
+
+CREATE TABLE `cart` (
+  `id` int NOT NULL,
+  `customer_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `quantity` int NOT NULL DEFAULT '1',
+  `added_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `cart`
+--
+
+INSERT INTO `cart` (`id`, `customer_id`, `product_id`, `quantity`, `added_at`) VALUES
+(28, 3, 5, 1, '2025-07-04 16:17:02'),
+(29, 4, 3, 1, '2025-07-04 16:18:57');
 
 -- --------------------------------------------------------
 
@@ -64,7 +86,8 @@ CREATE TABLE `customers` (
 INSERT INTO `customers` (`id`, `first_name`, `last_name`, `email`, `phone_number`, `password`, `reset_token`) VALUES
 (1, 'Nguyen', 'Van A', 'vana@example.com', '0901234567', 'password123', NULL),
 (2, 'Tran', 'Thi B', 'tib@example.com', '0912345678', 'password456', NULL),
-(3, 'Nguyễn', 'Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '$2y$10$e42JoGq37B7QE.7jH.J8juNt4Devx9b8HWYiSYJkhKfEubSjHAQxK', NULL);
+(3, 'Nguyễn', 'Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '$2y$10$e42JoGq37B7QE.7jH.J8juNt4Devx9b8HWYiSYJkhKfEubSjHAQxK', NULL),
+(4, 'Nguyễn Hữu Tài', 'Nhân', 'nguyenhuutainhan21003@gmail.com', '', '$2y$10$vVj8G5ta1HeFFdUmUkyrA.8Karp4UMFTwqIrhNQRFlL6fhGINK95G', NULL);
 
 -- --------------------------------------------------------
 
@@ -77,17 +100,21 @@ CREATE TABLE `customer_address` (
   `customer_id` int NOT NULL,
   `street` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `city` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `country_code` varchar(10) COLLATE utf8mb4_general_ci NOT NULL
+  `country_code` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `detail` text COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `customer_address`
 --
 
-INSERT INTO `customer_address` (`id`, `customer_id`, `street`, `city`, `country_code`) VALUES
-(1, 1, '123 Le Loi', 'Hanoi', 'VN'),
-(2, 2, '456 Nguyen Trai', 'Ho Chi Minh', 'VN'),
-(3, 3, 'us', 'sài gòn', 'Việt Nam');
+INSERT INTO `customer_address` (`id`, `customer_id`, `street`, `city`, `country_code`, `name`, `phone`, `detail`) VALUES
+(1, 1, '123 Le Loi', 'Hanoi', 'VN', '', '', ''),
+(2, 2, '456 Nguyen Trai', 'Ho Chi Minh', 'VN', '', '', ''),
+(12, 3, 'us', 'sài gòn', 'Việt Nam', 'Nguyễn Hữu Tài Nhân', '0397150061', ''),
+(13, 3, 'vn', 'Đà Nẵng', 'Việt Nam', 'Nguyễn Hữu Tài Nhân', '0397150061', '');
 
 -- --------------------------------------------------------
 
@@ -97,23 +124,38 @@ INSERT INTO `customer_address` (`id`, `customer_id`, `street`, `city`, `country_
 
 CREATE TABLE `orders` (
   `id` int NOT NULL,
-  `customer_id` int NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `customer_id` int DEFAULT NULL,
+  `customer_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_phone` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `address` json NOT NULL,
+  `shipping_method` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_method` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `status` int NOT NULL DEFAULT '1',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `order_items`
+-- Cấu trúc bảng cho bảng `order_status`
 --
 
-CREATE TABLE `order_items` (
+CREATE TABLE `order_status` (
   `id` int NOT NULL,
-  `order_id` int NOT NULL,
-  `product_id` int NOT NULL,
-  `quantity` int NOT NULL,
-  `price` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `label` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `order_status`
+--
+
+INSERT INTO `order_status` (`id`, `label`) VALUES
+(1, 'pending'),
+(2, 'processing'),
+(3, 'closed'),
+(4, 'cancel');
 
 -- --------------------------------------------------------
 
@@ -168,6 +210,14 @@ INSERT INTO `product_categories` (`product_id`, `category_id`) VALUES
 --
 
 --
+-- Chỉ mục cho bảng `cart`
+--
+ALTER TABLE `cart`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
 -- Chỉ mục cho bảng `categories`
 --
 ALTER TABLE `categories`
@@ -192,15 +242,14 @@ ALTER TABLE `customer_address`
 --
 ALTER TABLE `orders`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `customer_id` (`customer_id`);
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `status` (`status`);
 
 --
--- Chỉ mục cho bảng `order_items`
+-- Chỉ mục cho bảng `order_status`
 --
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
+ALTER TABLE `order_status`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Chỉ mục cho bảng `products`
@@ -220,6 +269,12 @@ ALTER TABLE `product_categories`
 --
 
 --
+-- AUTO_INCREMENT cho bảng `cart`
+--
+ALTER TABLE `cart`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
 -- AUTO_INCREMENT cho bảng `categories`
 --
 ALTER TABLE `categories`
@@ -229,13 +284,13 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT cho bảng `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `customer_address`
 --
 ALTER TABLE `customer_address`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT cho bảng `orders`
@@ -244,10 +299,10 @@ ALTER TABLE `orders`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `order_items`
+-- AUTO_INCREMENT cho bảng `order_status`
 --
-ALTER TABLE `order_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE `order_status`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `products`
@@ -260,6 +315,13 @@ ALTER TABLE `products`
 --
 
 --
+-- Ràng buộc cho bảng `cart`
+--
+ALTER TABLE `cart`
+  ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+
+--
 -- Ràng buộc cho bảng `customer_address`
 --
 ALTER TABLE `customer_address`
@@ -269,14 +331,8 @@ ALTER TABLE `customer_address`
 -- Ràng buộc cho bảng `orders`
 --
 ALTER TABLE `orders`
-  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE;
-
---
--- Ràng buộc cho bảng `order_items`
---
-ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`status`) REFERENCES `order_status` (`id`) ON DELETE RESTRICT;
 
 --
 -- Ràng buộc cho bảng `product_categories`
