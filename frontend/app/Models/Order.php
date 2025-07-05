@@ -13,6 +13,7 @@ class Order
             throw new Exception("Không thể kết nối đến cơ sở dữ liệu.");
         }
     }
+
     public function getOrderById($order_id)
     {
         $stmt = $this->dbh->prepare("SELECT * FROM orders WHERE id = ?");
@@ -23,26 +24,31 @@ class Order
     public function getOrderItems($order_id)
     {
         $stmt = $this->dbh->prepare("
-        SELECT oi.*, p.product_name 
-        FROM order_items oi
-        JOIN products p ON oi.product_id = p.id
-        WHERE oi.order_id = ?
-    ");
+            SELECT oi.*, p.product_name 
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = ?
+        ");
         $stmt->execute([$order_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function getOrders($customerId = null)
     {
         if ($customerId) {
-            $stmt = $this->dbh->prepare("SELECT * FROM orders WHERE customer_id = :customer_id ORDER BY created_at DESC");
-            $stmt->bindParam(':customer_id', $customerId);
+            $stmt = $this->dbh->prepare("SELECT * FROM orders WHERE customer_id = :customer_id ORDER BY id DESC");
+            $stmt->bindParam(':customer_id', $customerId, PDO::PARAM_INT);
+            error_log("Fetching orders for customer_id: $customerId");
         } else {
-            $stmt = $this->dbh->prepare("SELECT * FROM orders ORDER BY created_at DESC");
+            $stmt = $this->dbh->prepare("SELECT * FROM orders ORDER BY id DESC");
+            error_log("Fetching all orders (no customer_id)");
         }
-
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        error_log("Fetched orders count: " . count($orders));
+        return $orders;
     }
+
     public function getStatusList()
     {
         $stmt = $this->dbh->prepare("SELECT status_id, label FROM order_status ORDER BY status_id ASC");
@@ -63,13 +69,18 @@ class Order
     {
         return $this->updateStatus($orderId, 4); // 4 = Cancelled
     }
+
     public function createOrder($data) {
-        $stmt = $this->dbh->prepare("INSERT INTO orders (customer_id, customer_name, customer_email, customer_phone, customer_address, total_price, shipping_method, payment_method, status_id) 
+        $address = isset($data['customer_address']) && is_array(json_decode($data['customer_address'], true))
+            ? $data['customer_address']
+            : json_encode(['street' => '', 'city' => '', 'country_code' => '', 'detail' => '']);
+
+        $stmt = $this->dbh->prepare("INSERT INTO orders (customer_id, customer_name, customer_email, customer_phone, address, shipping_method, payment_method, total, status) 
                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([
             $data['customer_id'], $data['customer_name'], $data['customer_email'],
-            $data['customer_phone'], $data['customer_address'], $data['total_price'],
-            $data['shipping_method'], $data['payment_method'], $data['status_id']
+            $data['customer_phone'], $address, $data['shipping_method'], $data['payment_method'],
+            $data['total'], $data['status_id']
         ]);
         return $this->dbh->lastInsertId();
     }
@@ -80,8 +91,7 @@ class Order
     }
 
     public function decreaseProductStock($product_id, $qty) {
-        $stmt = $this->dbh->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
-        return $stmt->execute([$qty, $product_id]);
+        $stmt = $this->dbh->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?");
+        return $stmt->execute([$qty, $product_id, $qty]);
     }
-
 }
