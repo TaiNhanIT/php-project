@@ -15,10 +15,12 @@ class OrderController extends Controller
 
         $this->orderModel = new Order();
     }
+
     public function confirm()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $customer_id = $_SESSION['customer_id'] ?? null;
+            error_log("Customer ID in confirm: " . ($customer_id ?? 'null'));
             $address = json_decode($_POST['selected_address'] ?? '', true);
             $shipping_method = $_POST['shipping_method'] ?? 'standard';
             $payment_method = $_POST['payment_method'] ?? 'cod';
@@ -33,21 +35,36 @@ class OrderController extends Controller
                 exit;
             }
 
-            // Tạo đơn hàng
+            $customer_name = $address['name'] ?? '';
+            $customer_email = $customer_id ? ($_SESSION['customer_email'] ?? '') : ($_POST['customer_email'] ?? '');
+            $customer_phone = $address['phone'] ?? '';
+
+            if (!$customer_id && (empty($customer_name) || empty($customer_email) || empty($customer_phone))) {
+                $_SESSION['error_message'] = "Vui lòng nhập đầy đủ thông tin khách (nếu không đăng nhập).";
+                header('Location: /checkout');
+                exit;
+            }
+
+            $customer_address = json_encode([
+                'street' => $address['street'] ?? '',
+                'city' => $address['city'] ?? '',
+                'country_code' => $address['country_code'] ?? '',
+                'detail' => $address['detail'] ?? ''
+            ]);
+
             $orderModel = new Order();
             $order_id = $orderModel->createOrder([
                 'customer_id' => $customer_id,
-                'customer_name' => $address['name'],
-                'customer_email' => '', // Bạn có thể lấy từ $_SESSION nếu có
-                'customer_phone' => $address['phone'],
-                'customer_address' => $address['street'] . ', ' . $address['city'] . ', ' . $address['country_code'],
-                'total_price' => $total,
+                'customer_name' => $customer_name,
+                'customer_email' => $customer_email,
+                'customer_phone' => $customer_phone,
+                'customer_address' => $customer_address,
+                'total' => $total,
                 'shipping_method' => $shipping_method,
                 'payment_method' => $payment_method,
-                'status_id' => 1, // pending
+                'status_id' => 1,
             ]);
 
-            // Lưu từng sản phẩm
             foreach ($cart_items as $item) {
                 $orderModel->addOrderItem($order_id, $item['product_id'], $item['quantity'], $item['price']);
                 $orderModel->decreaseProductStock($item['product_id'], $item['quantity']);
@@ -63,10 +80,12 @@ class OrderController extends Controller
     public function index()
     {
         $customerId = $_SESSION['customer_id'] ?? null;
+        error_log("Customer ID in index: " . ($customerId ?? 'null'));
         $orders = $this->orderModel->getOrders($customerId);
 
         $this->view('order/index', [
-            'orders' => $orders
+            'orders' => $orders,
+            'customer_id' => $customerId
         ]);
     }
 
@@ -84,7 +103,8 @@ class OrderController extends Controller
 
         $this->view('order/detail', [
             'order' => $order,
-            'items' => $items
+            'items' => $items,
+            'customer_id' => $_SESSION['customer_id'] ?? null
         ]);
     }
 

@@ -39,7 +39,7 @@
                     <div class="mb-4 p-2 bg-gray-100 rounded">
                         <p><strong>Địa chỉ đã chọn:</strong></p>
                         <?php $addr = json_decode($selected_address, true); ?>
-                        <input type="hidden" name="selected_address" value="<?php echo htmlspecialchars(json_encode($addr)); ?>">
+                        <input type="hidden" name="selected_address" value="<?php echo htmlspecialchars($selected_address); ?>">
                         <p><?php echo htmlspecialchars((isset($addr['name']) ? $addr['name'] : '') . ' - ' . (isset($addr['phone']) ? $addr['phone'] : '') . ' - ' . (isset($addr['street']) ? $addr['street'] : '') . ', ' . (isset($addr['city']) ? $addr['city'] : '') . ', ' . (isset($addr['country_code']) ? $addr['country_code'] : '') . ' - ' . (isset($addr['detail']) ? $addr['detail'] : '')); ?></p>
                     </div>
                 <?php endif; ?>
@@ -72,6 +72,7 @@
                     <button type="button" x-on:click="showForm = true" class="mt-2 bg-green-500 text-white p-2 rounded">Thêm địa chỉ mới</button>
                 <?php endif; ?>
             </div>
+            <?php $customer_id = $customer_id ?? null; // Khởi tạo mặc định ?>
         </form>
     </div>
 
@@ -117,26 +118,36 @@
     <div class="bg-white p-4 rounded shadow">
         <h2 class="text-lg font-bold mb-4">Thông tin giỏ hàng</h2>
         <?php if (!empty($cart_items)): ?>
-            <ul class="space-y-4">
-                <?php foreach ($cart_items as $item): ?>
-                    <li class="flex items-center">
-                        <?php
-                        $imagePath = !empty($item['image']) ? '/assets/images/' . htmlspecialchars($item['image']) : '/placeholder.jpg';
-                        error_log("Image path for product ID {$item['product_id']}: $imagePath");
-                        ?>
-                        <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>" class="w-16 h-16 object-cover mr-4">
-                        <div>
-                            <p class="font-medium"><?php echo htmlspecialchars($item['product_name']); ?></p>
-                            <p class="text-gray-600">Giá: <?php echo number_format($item['price'], 0, ',', '.'); ?> VNĐ x <?php echo $item['quantity']; ?></p>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-            <div class="mt-4 text-right">
-                <p class="text-lg font-bold">Tổng: <?php echo number_format($total, 0, ',', '.'); ?> VNĐ</p>
-                <input type="hidden" name="total" value="<?php echo $total; ?>">
-            </div>
-            <button type="submit" formaction="/checkout/confirm" formmethod="POST" name="place_order" class="mt-4 w-full bg-green-500 text-white p-2 rounded">Mua hàng</button>
+            <form method="POST" action="/order/confirm">
+                <ul class="space-y-4">
+                    <?php foreach ($cart_items as $item): ?>
+                        <li class="flex items-center">
+                            <?php
+                            $imagePath = !empty($item['image']) ? '/assets/images/' . htmlspecialchars($item['image']) : '/placeholder.jpg';
+                            error_log("Image path for product ID {$item['product_id']}: $imagePath");
+                            ?>
+                            <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($item['product_name']); ?>" class="w-16 h-16 object-cover mr-4">
+                            <div>
+                                <p class="font-medium"><?php echo htmlspecialchars($item['product_name']); ?></p>
+                                <p class="text-gray-600">Giá: <?php echo number_format($item['price'], 0, ',', '.'); ?> VNĐ x <?php echo $item['quantity']; ?></p>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+                <div class="mt-4 text-right">
+                    <p class="text-lg font-bold">Tổng: <?php echo number_format($total, 0, ',', '.'); ?> VNĐ</p>
+                    <input type="hidden" name="total" value="<?php echo $total; ?>">
+                    <input type="hidden" name="selected_address" value="<?php echo htmlspecialchars($selected_address ?? ''); ?>">
+                    <input type="hidden" name="shipping_method" value="<?php echo htmlspecialchars($_POST['shipping_method'] ?? 'standard'); ?>">
+                    <input type="hidden" name="payment_method" value="<?php echo htmlspecialchars($_POST['payment_method'] ?? 'cod'); ?>">
+                    <?php if (!$customer_id): ?>
+                        <input type="hidden" name="customer_name" value="<?php echo htmlspecialchars($_POST['customer_name'] ?? ''); ?>">
+                        <input type="hidden" name="customer_email" value="<?php echo htmlspecialchars($_POST['customer_email'] ?? ''); ?>">
+                        <input type="hidden" name="customer_phone" value="<?php echo htmlspecialchars($_POST['customer_phone'] ?? ''); ?>">
+                    <?php endif; ?>
+                </div>
+                <button type="submit" name="place_order" class="mt-4 w-full bg-green-500 text-white p-2 rounded">Mua hàng</button>
+            </form>
         <?php else: ?>
             <p>Giỏ hàng trống.</p>
         <?php endif; ?>
