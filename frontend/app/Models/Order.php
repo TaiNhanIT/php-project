@@ -51,16 +51,16 @@ class Order
 
     public function getStatusList()
     {
-        $stmt = $this->dbh->prepare("SELECT status_id, label FROM order_status ORDER BY status_id ASC");
+        $stmt = $this->dbh->prepare("SELECT status, label FROM order_status ORDER BY status_id ASC");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR); // [1 => 'Pending', ...]
     }
 
-    public function updateStatus($orderId, $statusId)
+    public function updateStatus($orderId, $status)
     {
-        $stmt = $this->dbh->prepare("UPDATE orders SET status_id = :status_id WHERE id = :id");
+        $stmt = $this->dbh->prepare("UPDATE orders SET status = :status_id WHERE id = :id");
         return $stmt->execute([
-            ':status_id' => $statusId,
+            ':status_id' => $status,
             ':id' => $orderId
         ]);
     }
