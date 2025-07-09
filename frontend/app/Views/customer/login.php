@@ -12,28 +12,29 @@
     </div>
 <?php endif; ?>
 
+<?php
+$prefilledEmail = htmlspecialchars($_GET['email'] ?? ($_POST['email'] ?? ''));
+$orderIdQuery = !empty($_GET['order_id']) ? '&order_id=' . urlencode($_GET['order_id']) : '';
+?>
+
 <div class="container mx-auto">
-    <div class="max-w-md mx-auto bg-white">
+    <div class="max-w-md mx-auto bg-white shadow-md rounded-md">
         <div class="p-8">
-            <!-- Toggle between Login, Signup, and Forgot Password -->
             <div class="flex justify-center mb-8">
-                <button id="loginTab" class="px-6 py-2 font-medium text-white bg-blue-500 rounded-l-lg focus:outline-none">
-        Login
-    </button>
-    <button id="signupTab" class="px-6 py-2 font-medium text-blue-500 bg-white border border-blue-500 focus:outline-none">
-        Sign Up
-    </button>
+                <button id="loginTab" class="px-6 py-2 font-medium text-white bg-blue-500 rounded-l-lg focus:outline-none">Login</button>
+                <button id="signupTab" class="px-6 py-2 font-medium text-blue-500 bg-white border border-blue-500 focus:outline-none">Sign Up</button>
             </div>
+
             <!-- Login Form -->
             <form id="loginForm" class="space-y-6" method="post" action="/auth/login">
                 <h2 class="text-2xl font-bold text-center text-gray-800">Welcome Back</h2>
                 <div>
                     <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="loginEmail" name="email" value="<?= htmlspecialchars($email ?? '') ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <input type="email" name="email" id="loginEmail" value="<?= $prefilledEmail ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
                     <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="loginPassword" name="password" value="<?= htmlspecialchars($password ?? '') ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <input type="password" id="loginPassword" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
@@ -45,30 +46,30 @@
                     </div>
                 </div>
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600">
                         Sign in
                     </button>
                 </div>
             </form>
 
-            <!-- Signup Form (Hidden by default) -->
-            <form id="signupForm" class="space-y-6 hidden" method="post" action="/auth/register">
+            <!-- Signup Form -->
+            <form id="signupForm" class="space-y-6 hidden" method="post" action="/auth/register?email=<?= $prefilledEmail ?><?= $orderIdQuery ?>">
                 <h2 class="text-2xl font-bold text-center text-gray-800">Create Account</h2>
                 <div>
                     <label for="signupName" class="block text-sm font-medium text-gray-700">Full Name</label>
-                    <input type="text" id="signupName" name="full_name" value="<?= htmlspecialchars($form_data['full_name'] ?? '') ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" id="signupName" name="full_name" value="<?= htmlspecialchars($form_data['full_name'] ?? '') ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500">
                 </div>
                 <div>
                     <label for="signupEmail" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="signupEmail" name="email" value="<?= htmlspecialchars($form_data['email'] ?? '') ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <input type="email" id="signupEmail" name="email" value="<?= $prefilledEmail ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500">
                 </div>
                 <div>
                     <label for="signupPassword" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="signupPassword" name="password" value="<?= htmlspecialchars($form_data['password'] ?? '') ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <input type="password" id="signupPassword" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
                 </div>
                 <div>
                     <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                    <input type="password" id="confirmPassword" name="confirm_password" value="<?= htmlspecialchars($form_data['confirm_password'] ?? '') ?>" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <input type="password" id="confirmPassword" name="confirm_password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
                 </div>
                 <div class="flex items-center">
                     <input id="terms" name="agree_terms" type="checkbox" value="1" <?= isset($form_data['agree_terms']) ? 'checked' : '' ?> required class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded">
@@ -77,7 +78,7 @@
                     </label>
                 </div>
                 <div>
-                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 rounded-md text-white bg-blue-500 hover:bg-blue-600">
                         Create Account
                     </button>
                 </div>
@@ -87,45 +88,43 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const loginTab = document.getElementById('loginTab');
         const signupTab = document.getElementById('signupTab');
         const loginForm = document.getElementById('loginForm');
         const signupForm = document.getElementById('signupForm');
 
-        if (!loginTab || !signupTab || !loginForm || !signupForm) {
-            console.error('One or more DOM elements not found');
-            return;
-        }
-
-        signupTab.addEventListener('click', function(e) {
-            e.preventDefault();
+        function activateSignup() {
             loginForm.classList.add('hidden');
             signupForm.classList.remove('hidden');
             loginTab.classList.remove('bg-blue-500', 'text-white');
             loginTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             signupTab.classList.remove('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             signupTab.classList.add('bg-blue-500', 'text-white');
-            forgotTab.classList.remove('bg-blue-500', 'text-white');
-            forgotTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
-        });
+        }
 
-        loginTab.addEventListener('click', function(e) {
-            e.preventDefault();
+        function activateLogin() {
             signupForm.classList.add('hidden');
             loginForm.classList.remove('hidden');
             signupTab.classList.remove('bg-blue-500', 'text-white');
             signupTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             loginTab.classList.remove('bg-white', 'border', 'border-blue-500', 'text-blue-500');
             loginTab.classList.add('bg-blue-500', 'text-white');
-            forgotTab.classList.remove('bg-blue-500', 'text-white');
-            forgotTab.classList.add('bg-white', 'border', 'border-blue-500', 'text-blue-500');
+        }
+
+        signupTab.addEventListener('click', function (e) {
+            e.preventDefault();
+            activateSignup();
         });
 
-        forgotTab.addEventListener('click', function(e) {
+        loginTab.addEventListener('click', function (e) {
             e.preventDefault();
-            console.log('Redirecting to /auth/forgotPassword');
-            window.location.href = '/auth/forgotPassword';
+            activateLogin();
         });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('order_id')) {
+            activateSignup();
+        }
     });
 </script>

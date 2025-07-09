@@ -27,36 +27,48 @@ class CheckoutController extends Controller
     private function refreshCartIfNeeded()
     {
         $customerId = $_SESSION['customer_id'] ?? null;
-        if ($customerId && (!isset($_SESSION['last_customer_id']) || $_SESSION['last_customer_id'] != $customerId)) {
-            $cartItems = $this->cartModel->getCartItems($customerId);
-            $_SESSION['cart'] = $cartItems ?: [];
-            $_SESSION['last_customer_id'] = $customerId; // Lưu customer_id cuối cùng
+        $customerSession = $_SESSION['customer_session'] ?? null;
+
+        if (!$customerId && !$customerSession) {
+            $_SESSION['customer_session'] = uniqid('guest_', true);
+            $customerSession = $_SESSION['customer_session'];
         }
+
+        $cartItems = $this->cartModel->getCartItems($customerId, $customerSession);
+        $_SESSION['cart'] = $cartItems ?: [];
     }
 
     public function index()
     {
-        $cart_items = [];
-        $total = 0;
-        $addresses = $this->getCustomerAddresses();
-        $selected_address = isset($_SESSION['selected_address']) ? $_SESSION['selected_address'] : '';
-        $message = $_SESSION['message'] ?? '';
+        $customerId = $_SESSION['customer_id'] ?? null;
+        $customerSession = $_SESSION['customer_session'] ?? null;
 
-        if (isset($_SESSION['customer_id']) || !empty($_SESSION['cart'])) {
-            $cart_items = $this->cartModel->getCartItems($_SESSION['customer_id'] ?? null);
-            foreach ($cart_items as $item) {
-                $total += $item['price'] * $item['quantity'];
-            }
+        $cart_items = $this->cartModel->getCartItems($customerId, $customerSession);
+        $total = 0;
+        foreach ($cart_items as $item) {
+            $total += $item['price'] * $item['quantity'];
         }
+
+        $addresses = $this->getCustomerAddresses();
+
+        // Nếu chưa có selected_address, tự động chọn địa chỉ đầu tiên
+        if (empty($_SESSION['selected_address']) && !empty($addresses)) {
+            $_SESSION['selected_address'] = json_encode($addresses[0]);
+        }
+
+        $selected_address = $_SESSION['selected_address'] ?? '';
+        $message = $_SESSION['message'] ?? '';
 
         $this->view('checkout/checkout', [
             'cart_items' => $cart_items,
             'total' => $total,
             'addresses' => $addresses,
             'selected_address' => $selected_address,
+            'customer_id' => $customerId,
             'message' => $message
         ]);
-        unset($_SESSION['message']); // Xóa thông báo sau khi hiển thị
+
+        unset($_SESSION['message']);
     }
 
     public function saveAddress()
@@ -148,17 +160,19 @@ class CheckoutController extends Controller
     public function confirm()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
-            $customer_id = $_SESSION['customer_id'] ?? null;
+            $customerId = $_SESSION['customer_id'] ?? null;
+            $customerSession = $_SESSION['customer_session'] ?? null;
+
             $address = json_decode($_POST['selected_address'] ?? '', true);
             $shipping_method = $_POST['shipping_method'] ?? 'standard';
             $payment_method = $_POST['payment_method'] ?? 'cod';
 
-            // Lấy thông tin khách nếu không đăng nhập
-            $customer_name = $customer_id ? ($_SESSION['customer_name'] ?? '') : trim($_POST['customer_name'] ?? '');
-            $customer_email = $customer_id ? ($_SESSION['customer_email'] ?? '') : trim($_POST['customer_email'] ?? '');
-            $customer_phone = $customer_id ? ($_SESSION['customer_phone'] ?? '') : trim($_POST['customer_phone'] ?? '');
+            // Guest info
+            $customer_name = $customerId ? ($_SESSION['customer_name'] ?? '') : trim($_POST['customer_name'] ?? '');
+            $customer_email = $customerId ? ($_SESSION['customer_email'] ?? '') : trim($_POST['customer_email'] ?? '');
+            $customer_phone = $customerId ? ($_SESSION['customer_phone'] ?? '') : trim($_POST['customer_phone'] ?? '');
 
-            if (!$customer_id && (!empty($customer_name) || !empty($customer_email) || !empty($customer_phone))) {
+            if (!$customerId && (!empty($customer_name) || !empty($customer_email) || !empty($customer_phone))) {
                 $_SESSION['guest_info'] = [
                     'name' => $customer_name,
                     'email' => $customer_email,
@@ -166,25 +180,25 @@ class CheckoutController extends Controller
                 ];
             }
 
-            $cart_items = $this->cartModel->getCartItems($customer_id ?? null);
+            $cart_items = $this->cartModel->getCartItems($customerId, $customerSession);
             $total = 0;
             foreach ($cart_items as $item) {
                 $total += $item['price'] * $item['quantity'];
             }
 
-            if (empty($address) || empty($cart_items) || (!$customer_id && (empty($customer_name) || empty($customer_email) || empty($customer_phone)))) {
-                $_SESSION['error_message'] = 'Vui lòng chọn địa chỉ và nhập đầy đủ thông tin khách (nếu không đăng nhập) hoặc kiểm tra giỏ hàng.';
+            if (empty($address) || empty($cart_items) || (!$customerId && (empty($customer_name) || empty($customer_email) || empty($customer_phone)))) {
+                $_SESSION['error_message'] = 'Vui lòng chọn địa chỉ và nhập đầy đủ thông tin!';
                 header('Location: /checkout');
                 exit;
             }
 
-            $orderId = $this->saveOrder($customer_id, $customer_name, $customer_email, $customer_phone, $address, $shipping_method, $payment_method, $total);
+            $orderId = $this->saveOrder($customerId, $customer_name, $customer_email, $customer_phone, $address, $shipping_method, $payment_method, $total);
             if ($orderId) {
                 foreach ($cart_items as $item) {
                     $this->saveOrderDetail($orderId, $item['product_id'], $item['quantity'], $item['price']);
                     $this->updateStock($item['product_id'], $item['quantity']);
                 }
-                $this->cartModel->clearCart($customer_id ?? null);
+                $this->cartModel->clearCart($customerId, $customerSession);
                 $_SESSION['message'] = 'Đặt hàng thành công!';
                 header('Location: /order/success');
             } else {

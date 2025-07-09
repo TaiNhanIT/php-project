@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: db
--- Thời gian đã tạo: Th7 07, 2025 lúc 01:13 PM
+-- Thời gian đã tạo: Th7 09, 2025 lúc 03:58 PM
 -- Phiên bản máy phục vụ: 8.0.42
 -- Phiên bản PHP: 8.2.27
 
@@ -29,10 +29,11 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `cart` (
   `id` int NOT NULL,
-  `customer_id` int NOT NULL,
+  `customer_id` int DEFAULT NULL,
   `product_id` int NOT NULL,
   `quantity` int NOT NULL DEFAULT '1',
-  `added_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+  `added_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `customer_session` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -79,7 +80,9 @@ INSERT INTO `customers` (`id`, `first_name`, `last_name`, `email`, `phone_number
 (1, 'Nguyen', 'Van A', 'vana@example.com', '0901234567', 'password123', NULL),
 (2, 'Tran', 'Thi B', 'tib@example.com', '0912345678', 'password456', NULL),
 (3, 'Nguyễn', 'Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '$2y$10$e42JoGq37B7QE.7jH.J8juNt4Devx9b8HWYiSYJkhKfEubSjHAQxK', NULL),
-(4, 'Nguyễn Hữu Tài', 'Nhân', 'nguyenhuutainhan21003@gmail.com', '', '$2y$10$vVj8G5ta1HeFFdUmUkyrA.8Karp4UMFTwqIrhNQRFlL6fhGINK95G', NULL);
+(4, 'Nguyễn Hữu Tài', 'Nhân', 'nguyenhuutainhan21003@gmail.com', '', '$2y$10$vVj8G5ta1HeFFdUmUkyrA.8Karp4UMFTwqIrhNQRFlL6fhGINK95G', NULL),
+(5, 'Lê Văn', 'Hải', 'hai@gmail.com', '', '$2y$10$Pa7ckfnITibongDWYup1puQQY9YRGUVy66GP13xACOBGGYfjOZjRS', NULL),
+(6, 'Nguyễn Hữu Tài', 'Nhân', 'nguyenhuutainhan03@gmail.com', '', '$2y$10$2rqjtQWjrJjkXWqQpeP2kOYHLVb3KLFfTQiS5ua.0kVybQ8aSdQ1e', NULL);
 
 -- --------------------------------------------------------
 
@@ -95,7 +98,7 @@ CREATE TABLE `customer_address` (
   `country_code` varchar(10) COLLATE utf8mb4_general_ci NOT NULL,
   `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `detail` text COLLATE utf8mb4_general_ci NOT NULL
+  `detail` varchar(255) COLLATE utf8mb4_general_ci DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -105,11 +108,10 @@ CREATE TABLE `customer_address` (
 INSERT INTO `customer_address` (`id`, `customer_id`, `street`, `city`, `country_code`, `name`, `phone`, `detail`) VALUES
 (1, 1, '123 Le Loi', 'Hanoi', 'VN', '', '', ''),
 (2, 2, '456 Nguyen Trai', 'Ho Chi Minh', 'VN', '', '', ''),
-(12, 3, 'us', 'sài gòn', 'Việt Nam', 'Nguyễn Hữu Tài Nhân', '0397150061', ''),
-(13, 3, 'vn', 'Đà Nẵng', 'Việt Nam', 'Nguyễn Hữu Tài Nhân', '0397150061', ''),
-(14, 4, 'vn', 'Đà Nẵng', 'Việt Nam', 'Nguyễn Hữu Tài Nhân', '0397150061', ''),
 (15, 4, 'uk', 'Đà Nẵng', 'Việt Nam', 'anh hoang', '0888121123', ''),
-(16, 3, 'Hai Bà Trưng', 'Đà Nẵng', 'Việt Nam', 'Nguyễn Hữu Tài Nhân', '0397150061', '24/6 Hai Bà Trưng');
+(19, 3, 'Quốc Lộ 24B', 'Quảng Ngãi', 'Việt Nam', 'Nhân', '0397150061', ''),
+(21, 3, 'Hai Bà Trưng', 'Đà Nẵng', 'Việt Nam', 'Nguyễn Hữu Tài Nhân', '0397150061', ''),
+(25, 5, 'Tịnh Hà', 'Quảng Ngãi', 'Việt Nam', 'Lê VĂN', '099999', 'đối diện ủy ban Tịnh Hà');
 
 -- --------------------------------------------------------
 
@@ -126,7 +128,7 @@ CREATE TABLE `orders` (
   `address` json NOT NULL,
   `shipping_method` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment_method` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `total` decimal(10,2) NOT NULL,
+  `total` decimal(15,2) DEFAULT NULL,
   `status` int NOT NULL DEFAULT '1',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -152,7 +154,25 @@ INSERT INTO `orders` (`id`, `customer_id`, `customer_name`, `customer_email`, `c
 (14, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 22000000.00, 1, '2025-07-07 12:42:36'),
 (15, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"24/6 Hai Bà Trưng\", \"street\": \"Hai Bà Trưng\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 3799000.00, 1, '2025-07-07 13:04:01'),
 (16, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"24/6 Hai Bà Trưng\", \"street\": \"Hai Bà Trưng\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 22000000.00, 1, '2025-07-07 13:08:34'),
-(17, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"24/6 Hai Bà Trưng\", \"street\": \"Hai Bà Trưng\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 11397000.00, 1, '2025-07-07 13:11:36');
+(17, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"24/6 Hai Bà Trưng\", \"street\": \"Hai Bà Trưng\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 11397000.00, 1, '2025-07-07 13:11:36'),
+(18, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 22000000.00, 1, '2025-07-07 14:24:28'),
+(19, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 15000000.00, 1, '2025-07-07 14:25:43'),
+(20, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 264000000.00, 1, '2025-07-07 14:29:39'),
+(21, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 22000000.00, 1, '2025-07-09 07:12:52'),
+(22, 3, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhanit@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 22000000.00, 1, '2025-07-09 09:16:08'),
+(23, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan21003@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 37000000.00, 4, '2025-07-09 13:38:31'),
+(24, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 22000000.00, 1, '2025-07-09 13:43:36'),
+(25, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 22000000.00, 1, '2025-07-09 13:44:38'),
+(26, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 15000000.00, 1, '2025-07-09 13:50:38'),
+(27, NULL, 'Nguyễn Hữu Tài Nhân', 'sibi13@gmail.com', '0397150061', '{\"city\": \"Đà nẵng\", \"detail\": \"\", \"street\": \"Trần Cao Vân\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 3799000.00, 1, '2025-07-09 14:57:29'),
+(28, NULL, 'anh hoang', 'vana@example.com', '0888121123', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"uk\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 30000000.00, 1, '2025-07-09 15:01:00'),
+(29, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan21003@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 80000000.00, 1, '2025-07-09 15:03:52'),
+(30, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan21003@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 8000000.00, 1, '2025-07-09 15:07:27'),
+(31, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan21003@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 15000000.00, 1, '2025-07-09 15:13:44'),
+(32, NULL, 'Nguyễn Hữu Tài Nhân', 'nguyenhuutainhan2@gmail.com', '0397150061', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 40000000.00, 1, '2025-07-09 15:21:45'),
+(33, 5, 'hai le van', 'hai@gmail.com', '112334444', '{\"city\": \"Quảng Ngãi\", \"detail\": \"\", \"street\": \"vn\", \"country_code\": \"Việt Nam\"}', 'express', 'visa', 20000000.00, 1, '2025-07-09 15:34:06'),
+(34, 5, 'Lê VĂN', 'hai@gmail.com', '099999', '{\"city\": \"Quảng Ngãi\", \"detail\": \"đối diện ủy ban Tịnh Hà\", \"street\": \"Tịnh Hà\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 3799000.00, 4, '2025-07-09 15:40:48'),
+(35, 6, 'anh hoang', 'nguyenhuutainhan03@gmail.com', '0888121123', '{\"city\": \"Đà Nẵng\", \"detail\": \"\", \"street\": \"uk\", \"country_code\": \"Việt Nam\"}', 'standard', 'cod', 15000000.00, 1, '2025-07-09 15:50:54');
 
 -- --------------------------------------------------------
 
@@ -188,7 +208,26 @@ INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `quantity`, `price`) 
 (13, 14, 4, 1, 22000000.00),
 (14, 15, 5, 1, 3799000.00),
 (15, 16, 4, 1, 22000000.00),
-(16, 17, 5, 3, 3799000.00);
+(16, 17, 5, 3, 3799000.00),
+(17, 18, 4, 1, 22000000.00),
+(18, 19, 2, 1, 15000000.00),
+(19, 20, 4, 12, 22000000.00),
+(20, 21, 4, 1, 22000000.00),
+(21, 22, 4, 1, 22000000.00),
+(22, 23, 2, 1, 15000000.00),
+(23, 23, 4, 1, 22000000.00),
+(24, 24, 4, 1, 22000000.00),
+(25, 25, 4, 1, 22000000.00),
+(26, 26, 2, 1, 15000000.00),
+(27, 27, 5, 1, 3799000.00),
+(28, 28, 2, 2, 15000000.00),
+(29, 29, 1, 4, 20000000.00),
+(30, 30, 3, 4, 2000000.00),
+(31, 31, 2, 1, 15000000.00),
+(32, 32, 1, 2, 20000000.00),
+(33, 33, 1, 1, 20000000.00),
+(34, 34, 5, 1, 3799000.00),
+(35, 35, 2, 1, 15000000.00);
 
 -- --------------------------------------------------------
 
@@ -231,11 +270,11 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `product_name`, `price`, `description`, `stock_quantity`, `image`) VALUES
-(1, 'Samsung Galaxy S21', 20000000.00, 'Smartphone cao cấp', 50, 'OIP.webp'),
-(2, 'Samsung Tab S7', 15000000.00, 'Máy tính bảng', 27, 'OIP (1).webp'),
-(3, 'Tai nghe Samsung', 2000000.00, 'Phụ kiện chính hãng', 99, '44194951e8a5310d0386a342bf0c24e7.jpg'),
-(4, 'Điện thoại Samsung Galaxy A54 5G 8GB/256GB Xanh', 22000000.00, 'Điện thoại Samsung thiết kế sang trọng, siêu mỏng nhẹ chỉ 202 gam\r\nMàn hình Super AMOLED, phân giải Full HD+, hình ảnh hiển thị sống động\r\nChip Exynos 1380 mạnh mẽ, nghe gọi, xem phim, lướt web mượt mà\r\nBộ 3 camera sau 50MP, 12MP, 5MP ghi lại mọi khoảnh khắc đẹp sắc nét\r\nCamera trước 32MP, chụp ảnh chân dung đẹp tự nhiên và ấn tượng\r\nTính năng Quay chụp chống rung chuyên nghiệp OIS, hạn chế mờ nhòe\r\nViên pin dung lượng 5000mAh bền bỉ, làm việc và giải trí suốt cả ngày\r\nĐạt tiêu chuẩn kháng nước IP67, sử dụng bất chấp thời tiết nắng mưa\r\nTrang bị cảm biến vân tay trong màn hình, mở khóa nhanh với 1 chạm', 6, 'J-Switch-to-A24-Product-Photo-e1695159319345.jpeg'),
-(5, 'Máy tính bảng Samsung Galaxy Tab A8', 3799000.00, '', 12, 'R.png');
+(1, 'Samsung Galaxy S21', 20000000.00, 'Smartphone cao cấp', 43, 'OIP.webp'),
+(2, 'Samsung Tab S7', 15000000.00, 'Máy tính bảng', 20, 'OIP (1).webp'),
+(3, 'Tai nghe Samsung', 2000000.00, 'Phụ kiện chính hãng', 95, '44194951e8a5310d0386a342bf0c24e7.jpg'),
+(4, 'Điện thoại Samsung Galaxy A54 5G 8GB/256GB Xanh', 22000000.00, 'Điện thoại Samsung thiết kế sang trọng, siêu mỏng nhẹ chỉ 202 gam\r\nMàn hình Super AMOLED, phân giải Full HD+, hình ảnh hiển thị sống động\r\nChip Exynos 1380 mạnh mẽ, nghe gọi, xem phim, lướt web mượt mà\r\nBộ 3 camera sau 50MP, 12MP, 5MP ghi lại mọi khoảnh khắc đẹp sắc nét\r\nCamera trước 32MP, chụp ảnh chân dung đẹp tự nhiên và ấn tượng\r\nTính năng Quay chụp chống rung chuyên nghiệp OIS, hạn chế mờ nhòe\r\nViên pin dung lượng 5000mAh bền bỉ, làm việc và giải trí suốt cả ngày\r\nĐạt tiêu chuẩn kháng nước IP67, sử dụng bất chấp thời tiết nắng mưa\r\nTrang bị cảm biến vân tay trong màn hình, mở khóa nhanh với 1 chạm', 0, 'J-Switch-to-A24-Product-Photo-e1695159319345.jpeg'),
+(5, 'Máy tính bảng Samsung Galaxy Tab A8', 3799000.00, '', 10, 'R.png');
 
 -- --------------------------------------------------------
 
@@ -268,7 +307,9 @@ INSERT INTO `product_categories` (`product_id`, `category_id`) VALUES
 --
 ALTER TABLE `cart`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `customer_id` (`customer_id`),
+  ADD UNIQUE KEY `unique_guest_cart` (`customer_session`,`product_id`),
+  ADD UNIQUE KEY `unique_cart_item` (`customer_id`,`customer_session`,`product_id`),
+  ADD UNIQUE KEY `unique_user_cart` (`customer_id`,`product_id`),
   ADD KEY `product_id` (`product_id`);
 
 --
@@ -334,7 +375,7 @@ ALTER TABLE `product_categories`
 -- AUTO_INCREMENT cho bảng `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT cho bảng `categories`
@@ -346,25 +387,25 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT cho bảng `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `customer_address`
 --
 ALTER TABLE `customer_address`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT cho bảng `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT cho bảng `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT cho bảng `order_status`

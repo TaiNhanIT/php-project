@@ -23,8 +23,6 @@ class AuthController extends Controller
     {
         $loginError = '';
         $registerSuccess = '';
-        $email = '';
-        $password = '';
 
         if (isset($_SESSION['register_success'])) {
             $registerSuccess = $_SESSION['register_success'];
@@ -58,8 +56,6 @@ class AuthController extends Controller
         $this->view('customer/login', [
             'loginError' => $loginError,
             'registerSuccess' => $registerSuccess,
-            'email' => $email,
-            'password' => $password
         ]);
     }
 
@@ -67,6 +63,10 @@ class AuthController extends Controller
     {
         $register_error = '';
         $form_data = $_POST ?? [];
+
+        // Prefill email from GET nếu có
+        $form_data['email'] = $_GET['email'] ?? ($form_data['email'] ?? '');
+        $order_id = $_GET['order_id'] ?? null;
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $form_data = [
@@ -79,6 +79,7 @@ class AuthController extends Controller
 
             $agree_terms = isset($_POST['agree_terms']);
 
+            // Kiểm tra dữ liệu hợp lệ
             if (
                 empty($form_data['full_name']) || empty($form_data['email']) ||
                 empty($form_data['password']) || empty($form_data['confirm_password'])
@@ -96,15 +97,18 @@ class AuthController extends Controller
                 try {
                     $customerModel = new Customer();
 
+                    // Kiểm tra email đã tồn tại
                     if ($customerModel->emailExists($form_data['email'])) {
                         $register_error = "Email đã tồn tại!";
                     } else {
+                        // Tách họ tên
                         $name_parts = explode(' ', $form_data['full_name']);
                         $last_name = array_pop($name_parts);
                         $first_name = implode(' ', $name_parts);
 
                         $hashedPassword = password_hash($form_data['password'], PASSWORD_DEFAULT);
 
+                        // Tạo tài khoản khách hàng
                         $customer_id = $customerModel->addCustomer([
                             'first_name' => $first_name,
                             'last_name' => $last_name,
@@ -114,10 +118,22 @@ class AuthController extends Controller
                         ]);
 
                         if ($customer_id) {
-                            $_SESSION['register_success'] = "Đăng ký thành công! Vui lòng đăng nhập.";
-                            $_SESSION['login_email'] = $form_data['email'];
-                            $_SESSION['login_password'] = $form_data['password'];
-                            header('Location: /auth/login');
+                            // Gán đơn hàng cho tài khoản nếu có order_id
+                            if (!empty($order_id)) {
+                                require_once __DIR__ . '/../Models/Order.php';
+                                $orderModel = new Order();
+                                $orderModel->assignOrderToCustomer((int)$order_id, $customer_id);
+                                $_SESSION['success_message'] = "Tài khoản đã được tạo. Đơn hàng đã được liên kết.";
+                            } else {
+                                $_SESSION['success_message'] = "Tài khoản đã được tạo thành công!";
+                            }
+
+                            // Tự động đăng nhập
+                            $_SESSION['customer_id'] = $customer_id;
+                            $_SESSION['customer_email'] = $form_data['email'];
+                            $_SESSION['customer_name'] = $form_data['full_name'];
+
+                            header("Location: /order");
                             exit;
                         } else {
                             $register_error = "Đăng ký thất bại do lỗi hệ thống!";
@@ -135,6 +151,7 @@ class AuthController extends Controller
             'form_data' => $form_data
         ]);
     }
+
 
     public function forgotPassword()
     {
@@ -167,8 +184,6 @@ class AuthController extends Controller
     {
         $error = '';
         $success = '';
-
-        echo "Debug: Entering resetPassword with token = $token<br>";
 
         if (empty($token)) {
             $error = 'Token không hợp lệ.';
@@ -208,12 +223,16 @@ class AuthController extends Controller
     public function logout()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
-        // Xóa thông tin session của khách hàng và giỏ hàng
+
+        // Xóa thông tin đăng nhập, nhưng giữ lại customer_session và cart
         unset($_SESSION['customer_id']);
         unset($_SESSION['customer_email']);
         unset($_SESSION['customer_name']);
-        unset($_SESSION['cart']); // Xóa giỏ hàng trong session khi đăng xuất
+
+        // Không xóa $_SESSION['customer_session'] và $_SESSION['cart'] để giữ giỏ hàng
+
         header('Location: /auth/login');
         exit;
     }
+
 }
