@@ -36,12 +36,14 @@ class Customer extends Database
         return $addresses;
     }
 
-    public function addAddress($customerId, $street, $city, $country_code)
+    public function addAddress($customerId, $street, $city, $country_code, $name, $phone, $detail)
     {
         $db = $this->getDbh();
-        $stmt = $db->prepare("INSERT INTO customer_address (customer_id, street, city, country_code) VALUES (?, ?, ?, ?)");
-        return $stmt->execute([$customerId, $street, $city, $country_code]);
+        $stmt = $db->prepare("INSERT INTO customer_address (customer_id, street, city, country_code, name, phone, detail) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        return $stmt->execute([$customerId, $street, $city, $country_code, $name, $phone, $detail]);
     }
+
+
 
     public function updateAddress($addressId, $street, $city, $country_code)
     {

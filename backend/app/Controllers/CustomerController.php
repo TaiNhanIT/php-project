@@ -23,6 +23,7 @@ class CustomerController extends Controller {
         $customer = $customerModel->getCustomerById($id); // Lấy thông tin khách hàng theo id
         require_once __DIR__ . '/../views/customers/detail.php';
     }
+
 	public function edit($id) {
 	    $customerModel = new Customer();
 	    $error = '';

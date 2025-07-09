@@ -13,7 +13,14 @@ class Order
             throw new Exception("Không thể kết nối đến cơ sở dữ liệu.");
         }
     }
-
+    public function assignOrderToCustomer($order_id, $customer_id)
+    {
+        $stmt = $this->dbh->prepare("UPDATE orders SET customer_id = :customer_id WHERE id = :order_id");
+        return $stmt->execute([
+            ':customer_id' => $customer_id,
+            ':order_id' => $order_id
+        ]);
+    }
     public function getOrderById($order_id)
     {
         $stmt = $this->dbh->prepare("SELECT * FROM orders WHERE id = ?");
@@ -36,18 +43,26 @@ class Order
     public function getOrders($customerId = null)
     {
         if ($customerId) {
-            $stmt = $this->dbh->prepare("SELECT * FROM orders WHERE customer_id = :customer_id ORDER BY id DESC");
+            $stmt = $this->dbh->prepare("
+            SELECT * FROM orders 
+            WHERE customer_id = :customer_id 
+            ORDER BY id DESC
+        ");
             $stmt->bindParam(':customer_id', $customerId, PDO::PARAM_INT);
-            error_log("Fetching orders for customer_id: $customerId");
         } else {
-            $stmt = $this->dbh->prepare("SELECT * FROM orders ORDER BY id DESC");
-            error_log("Fetching all orders (no customer_id)");
+            // Trường hợp không có customer_id (ví dụ admin xem toàn bộ), nhưng loại bỏ guest
+            $stmt = $this->dbh->prepare("
+            SELECT * FROM orders 
+            WHERE customer_id IS NOT NULL 
+            ORDER BY id DESC
+        ");
         }
+
         $stmt->execute();
-        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        error_log("Fetched orders count: " . count($orders));
-        return $orders;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
 
     public function getStatusList()
     {

@@ -3,9 +3,10 @@ require_once __DIR__ . '/../Core/Controller.php';
 require_once __DIR__ . '/../Models/Products.php';
 require_once __DIR__ . '/../Models/Category.php';
 require_once __DIR__ . '/../Models/Customer.php';
-require_once __DIR__ . '/../Models/Order.php'; // Thêm để lấy danh sách đơn hàng
+require_once __DIR__ . '/../Models/Order.php';
 
 class CustomerController extends Controller {
+
     public function index() {
         $customerModel = new Customer();
         $perPage = 6;
@@ -21,8 +22,8 @@ class CustomerController extends Controller {
     }
 
     public function detail($id) {
-        $customerModel = new Customer(); // Tạo đối tượng model Customer
-        $customer = $customerModel->getCustomerById($id); // Lấy thông tin khách hàng theo id
+        $customerModel = new Customer();
+        $customer = $customerModel->getCustomerById($id);
         require_once __DIR__ . '/../views/customer/detail.php';
     }
 
@@ -105,7 +106,7 @@ class CustomerController extends Controller {
         }
 
         $customerModel = new Customer();
-        $orderModel = new Order(); // Tạo đối tượng Order model
+        $orderModel = new Order();
         $customer = $customerModel->getCustomerById($_SESSION['customer_id']);
         $orders = $orderModel->getOrders($_SESSION['customer_id']);
 
@@ -114,5 +115,142 @@ class CustomerController extends Controller {
             'orders' => $orders,
             'customerModel' => $customerModel
         ]);
+    }
+    public function addressBook() {
+        if (!isset($_SESSION['customer_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $customerModel = new Customer();
+        $customerId = $_SESSION['customer_id'];
+        $error = '';
+
+        // Thêm địa chỉ
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_address'])) {
+            $street = trim($_POST['new_street']);
+            $city = trim($_POST['new_city']);
+            $country = trim($_POST['new_country_code']);
+            if ($street && $city && $country) {
+                $customerModel->addAddress($customerId, $street, $city, $country);
+            } else {
+                $error = "Vui lòng nhập đầy đủ thông tin.";
+            }
+        }
+
+        // Xóa địa chỉ
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_address'])) {
+            $addrId = $_POST['delete_address'];
+            $customerModel->deleteAddress($addrId);
+        }
+
+        // Sửa địa chỉ
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addresses'])) {
+            foreach ($_POST['addresses'] as $addr) {
+                $customerModel->updateAddress(
+                    $addr['id'],
+                    $addr['street'],
+                    $addr['city'],
+                    $addr['country_code']
+                );
+            }
+        }
+
+        $addresses = $customerModel->getCustomerAddresses($customerId);
+
+        $this->view('customer/addressBook', [
+            'addresses' => $addresses,
+            'error' => $error
+        ]);
+    }
+    //Trang hiển thị Address Book riêng
+    public function address() {
+        if (!isset($_SESSION['customer_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $customerModel = new Customer();
+        $addresses = $customerModel->getCustomerAddresses($_SESSION['customer_id']);
+
+        $this->view('customer/address', [
+            'addresses' => $addresses
+        ]);
+    }
+
+    // ✅ Trang hiển thị danh sách Orders riêng
+    public function orders() {
+        if (!isset($_SESSION['customer_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $orderModel = new Order();
+        $orders = $orderModel->getOrders($_SESSION['customer_id']);
+
+        $this->view('customer/orders', [
+            'orders' => $orders
+        ]);
+    }
+
+    // ✅ Xử lý thêm địa chỉ
+    public function addAddress() {
+        if (!isset($_SESSION['customer_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $street = trim($_POST['street'] ?? '');
+        $city = trim($_POST['city'] ?? '');
+        $country = trim($_POST['country_code'] ?? '');
+        $name = trim($_POST['name'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $detail = trim($_POST['detail'] ?? '') ?: null;  // sẽ là null nếu rỗng
+
+        if ($street && $city && $country && $name && $phone) {
+            $customerModel = new Customer();
+            $customerModel->addAddress($_SESSION['customer_id'], $street, $city, $country, $name, $phone, $detail);
+
+            $_SESSION['flash_message'] = "Thêm mới địa chỉ thành công";
+        } else {
+            $_SESSION['flash_message'] = "Vui lòng nhập đầy đủ thông tin bắt buộc.";
+        }
+
+        header('Location: /customer/address');
+        exit;
+    }
+
+
+
+    // ✅ Xử lý xoá địa chỉ
+    public function deleteAddress() {
+        if (!isset($_SESSION['customer_id']) || empty($_POST['address_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $customerModel = new Customer();
+        $customerModel->deleteAddress((int)$_POST['address_id']);
+        $_SESSION['flash_message'] = " Đã xóa địa chỉ.";
+        header('Location: /customer/address');
+        exit;
+    }
+    public function editAddress() {
+        if (!isset($_SESSION['customer_id'])) {
+            header('Location: /login');
+            exit;
+        }
+
+        $id = $_POST['id'];
+        $street = $_POST['street'];
+        $city = $_POST['city'];
+        $country = $_POST['country_code'];
+
+        $customerModel = new Customer();
+        $customerModel->updateAddress($id, $street, $city, $country);
+
+        $_SESSION['flash_message'] = "✏️ Đã cập nhật địa chỉ.";
+        header('Location: /customer/address');
+        exit;
     }
 }

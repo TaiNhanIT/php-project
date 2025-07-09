@@ -9,9 +9,19 @@
 </head>
 <body class="bg-gray-100">
 <div class="container mx-auto p-6 mt-10">
+    <?php if (!isset($_SESSION['customer_id']) && empty($order['customer_id'])): ?>
+        <div class="mt-6 p-4 bg-yellow-100 rounded">
+            <p class="mb-2 font-semibold">Bạn đã đặt hàng thành công!</p>
+            <p class="mb-2">Bạn có muốn tạo tài khoản để dễ dàng theo dõi đơn hàng và lịch sử mua hàng không?</p>
+            <a href="/auth/register?order_id=<?= $order['id'] ?>&email=<?= urlencode($order['customer_email']) ?>"
+               class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                Tạo tài khoản
+            </a>
+        </div>
+    <?php endif; ?>
+
     <div class="bg-white p-6 rounded shadow-lg">
         <h2 class="text-2xl font-bold mb-4">Chi tiết đơn hàng #<?php echo htmlspecialchars($order['id'] ?? ''); ?></h2>
-
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
                 <?php echo htmlspecialchars($_SESSION['success_message']); unset($_SESSION['success_message']); ?>
@@ -78,7 +88,7 @@
         <div class="mt-6 text-right text-xl font-bold">
             Tổng tiền: <?php echo number_format($order['total'] ?? 0, 0, ',', '.'); ?> đ
         </div>
-        <a href="/order" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Quay lại danh sách</a>
+<!--        <a href="/order" class="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Quay lại danh sách</a>-->
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
